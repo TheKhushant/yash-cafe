@@ -39,4 +39,20 @@ export const notificationsService = {
     const { data } = await apiClient.post<AppNotification>("/notifications", input);
     return data;
   },
+  
+  async remove(id: string): Promise<void> {
+    if (USE_MOCKS) {
+      const notifications = db().notifications;
+      const index = notifications.findIndex((n) => n.id === id);
+
+      if (index !== -1) {
+        notifications.splice(index, 1);
+      }
+
+      return delay(undefined, 250);
+    }
+
+    await apiClient.delete(`/notifications/${id}`);
+  },
+
 };
