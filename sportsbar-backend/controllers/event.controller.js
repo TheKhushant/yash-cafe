@@ -17,9 +17,15 @@ const createEvent = async (req, res) => {
       ...req.body,
       venue: req.user.venueId
     });
+
     res.status(201).json(event);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(error);
+
+    res.status(500).json({
+      message: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    });
   }
 };
 
@@ -32,7 +38,12 @@ const updateEvent = async (req, res) => {
     );
     res.json(event);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+      console.error(error);
+
+      res.status(500).json({
+          message: error.message,
+          stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+      });
   }
 };
 

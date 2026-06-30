@@ -16,6 +16,10 @@ dns.setServers([
 ])
 dotenv.config();
 
+console.log("JWT_SECRET =", process.env.JWT_SECRET);
+console.log("JWT_EXPIRES_IN =", process.env.JWT_EXPIRES_IN);
+console.log("typeof =", typeof process.env.JWT_EXPIRES_IN);
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
