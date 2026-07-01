@@ -60,6 +60,55 @@ export const analyticsService = {
     const { data } = await apiClient.get<AnalyticsData>("/analytics", {
       params: { venueId, rangeDays },
     });
+    
     return data;
   },
+  async getPlatformAnalytics() {
+      const { data } = await apiClient.get("/platform/analytics");
+      return data;
+  },
+  async getPlatformRevenue() {
+    if (USE_MOCKS) {
+      return delay({
+        totalRevenue: 1248900,
+        revenueChange: 18.5,
+        totalOrders: 45230,
+        avgOrderValue: 27.6,
+
+        monthlyRevenue: [
+          { month: "Jan", revenue: 98000 },
+          { month: "Feb", revenue: 112000 },
+          { month: "Mar", revenue: 125000 },
+          { month: "Apr", revenue: 138000 },
+          { month: "May", revenue: 149000 },
+          { month: "Jun", revenue: 162000 },
+        ],
+
+        topVenues: [
+          {
+            name: "Downtown Sports Bar",
+            city: "New York",
+            revenue: 218000,
+            growth: 18,
+          },
+          {
+            name: "Arena Lounge",
+            city: "Chicago",
+            revenue: 197000,
+            growth: 15,
+          },
+          {
+            name: "Champions Pub",
+            city: "Los Angeles",
+            revenue: 181000,
+            growth: 12,
+          },
+        ],
+      });
+    }
+
+    const { data } = await apiClient.get("/platform/revenue");
+
+    return data;
+  }
 };

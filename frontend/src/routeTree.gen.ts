@@ -13,14 +13,19 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
+import { Route as AuthenticatedSystemSettingsRouteImport } from './routes/_authenticated.system-settings'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedScannerRouteImport } from './routes/_authenticated.scanner'
+import { Route as AuthenticatedPlatformUsersRouteImport } from './routes/_authenticated.platform-users'
+import { Route as AuthenticatedPlatformRevenueRouteImport } from './routes/_authenticated.platform-revenue'
+import { Route as AuthenticatedPlatformAnalyticsRouteImport } from './routes/_authenticated.platform-analytics'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated.orders'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated.menu'
 import { Route as AuthenticatedGamesRouteImport } from './routes/_authenticated.games'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated.events'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedBarsRouteImport } from './routes/_authenticated.bars'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated.analytics'
 
 const LoginRoute = LoginRouteImport.update({
@@ -42,6 +47,12 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSystemSettingsRoute =
+  AuthenticatedSystemSettingsRouteImport.update({
+    id: '/system-settings',
+    path: '/system-settings',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -52,6 +63,24 @@ const AuthenticatedScannerRoute = AuthenticatedScannerRouteImport.update({
   path: '/scanner',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPlatformUsersRoute =
+  AuthenticatedPlatformUsersRouteImport.update({
+    id: '/platform-users',
+    path: '/platform-users',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPlatformRevenueRoute =
+  AuthenticatedPlatformRevenueRouteImport.update({
+    id: '/platform-revenue',
+    path: '/platform-revenue',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPlatformAnalyticsRoute =
+  AuthenticatedPlatformAnalyticsRouteImport.update({
+    id: '/platform-analytics',
+    path: '/platform-analytics',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -83,6 +112,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBarsRoute = AuthenticatedBarsRouteImport.update({
+  id: '/bars',
+  path: '/bars',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -93,28 +127,38 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/bars': typeof AuthenticatedBarsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
   '/games': typeof AuthenticatedGamesRoute
   '/menu': typeof AuthenticatedMenuRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRoute
+  '/platform-analytics': typeof AuthenticatedPlatformAnalyticsRoute
+  '/platform-revenue': typeof AuthenticatedPlatformRevenueRoute
+  '/platform-users': typeof AuthenticatedPlatformUsersRoute
   '/scanner': typeof AuthenticatedScannerRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/system-settings': typeof AuthenticatedSystemSettingsRoute
   '/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/bars': typeof AuthenticatedBarsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
   '/games': typeof AuthenticatedGamesRoute
   '/menu': typeof AuthenticatedMenuRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/orders': typeof AuthenticatedOrdersRoute
+  '/platform-analytics': typeof AuthenticatedPlatformAnalyticsRoute
+  '/platform-revenue': typeof AuthenticatedPlatformRevenueRoute
+  '/platform-users': typeof AuthenticatedPlatformUsersRoute
   '/scanner': typeof AuthenticatedScannerRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/system-settings': typeof AuthenticatedSystemSettingsRoute
   '/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRoutesById {
@@ -123,14 +167,19 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/bars': typeof AuthenticatedBarsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/games': typeof AuthenticatedGamesRoute
   '/_authenticated/menu': typeof AuthenticatedMenuRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
+  '/_authenticated/platform-analytics': typeof AuthenticatedPlatformAnalyticsRoute
+  '/_authenticated/platform-revenue': typeof AuthenticatedPlatformRevenueRoute
+  '/_authenticated/platform-users': typeof AuthenticatedPlatformUsersRoute
   '/_authenticated/scanner': typeof AuthenticatedScannerRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/system-settings': typeof AuthenticatedSystemSettingsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRouteTypes {
@@ -139,28 +188,38 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/analytics'
+    | '/bars'
     | '/dashboard'
     | '/events'
     | '/games'
     | '/menu'
     | '/notifications'
     | '/orders'
+    | '/platform-analytics'
+    | '/platform-revenue'
+    | '/platform-users'
     | '/scanner'
     | '/settings'
+    | '/system-settings'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/analytics'
+    | '/bars'
     | '/dashboard'
     | '/events'
     | '/games'
     | '/menu'
     | '/notifications'
     | '/orders'
+    | '/platform-analytics'
+    | '/platform-revenue'
+    | '/platform-users'
     | '/scanner'
     | '/settings'
+    | '/system-settings'
     | '/users'
   id:
     | '__root__'
@@ -168,14 +227,19 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/analytics'
+    | '/_authenticated/bars'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
     | '/_authenticated/games'
     | '/_authenticated/menu'
     | '/_authenticated/notifications'
     | '/_authenticated/orders'
+    | '/_authenticated/platform-analytics'
+    | '/_authenticated/platform-revenue'
+    | '/_authenticated/platform-users'
     | '/_authenticated/scanner'
     | '/_authenticated/settings'
+    | '/_authenticated/system-settings'
     | '/_authenticated/users'
   fileRoutesById: FileRoutesById
 }
@@ -215,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/system-settings': {
+      id: '/_authenticated/system-settings'
+      path: '/system-settings'
+      fullPath: '/system-settings'
+      preLoaderRoute: typeof AuthenticatedSystemSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -227,6 +298,27 @@ declare module '@tanstack/react-router' {
       path: '/scanner'
       fullPath: '/scanner'
       preLoaderRoute: typeof AuthenticatedScannerRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/platform-users': {
+      id: '/_authenticated/platform-users'
+      path: '/platform-users'
+      fullPath: '/platform-users'
+      preLoaderRoute: typeof AuthenticatedPlatformUsersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/platform-revenue': {
+      id: '/_authenticated/platform-revenue'
+      path: '/platform-revenue'
+      fullPath: '/platform-revenue'
+      preLoaderRoute: typeof AuthenticatedPlatformRevenueRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/platform-analytics': {
+      id: '/_authenticated/platform-analytics'
+      path: '/platform-analytics'
+      fullPath: '/platform-analytics'
+      preLoaderRoute: typeof AuthenticatedPlatformAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/orders': {
@@ -271,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/bars': {
+      id: '/_authenticated/bars'
+      path: '/bars'
+      fullPath: '/bars'
+      preLoaderRoute: typeof AuthenticatedBarsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
@@ -283,27 +382,37 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedBarsRoute: typeof AuthenticatedBarsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedGamesRoute: typeof AuthenticatedGamesRoute
   AuthenticatedMenuRoute: typeof AuthenticatedMenuRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
+  AuthenticatedPlatformAnalyticsRoute: typeof AuthenticatedPlatformAnalyticsRoute
+  AuthenticatedPlatformRevenueRoute: typeof AuthenticatedPlatformRevenueRoute
+  AuthenticatedPlatformUsersRoute: typeof AuthenticatedPlatformUsersRoute
   AuthenticatedScannerRoute: typeof AuthenticatedScannerRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSystemSettingsRoute: typeof AuthenticatedSystemSettingsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedBarsRoute: AuthenticatedBarsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedGamesRoute: AuthenticatedGamesRoute,
   AuthenticatedMenuRoute: AuthenticatedMenuRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
+  AuthenticatedPlatformAnalyticsRoute: AuthenticatedPlatformAnalyticsRoute,
+  AuthenticatedPlatformRevenueRoute: AuthenticatedPlatformRevenueRoute,
+  AuthenticatedPlatformUsersRoute: AuthenticatedPlatformUsersRoute,
   AuthenticatedScannerRoute: AuthenticatedScannerRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSystemSettingsRoute: AuthenticatedSystemSettingsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
 }
 

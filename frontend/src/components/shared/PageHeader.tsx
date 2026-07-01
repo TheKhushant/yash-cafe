@@ -1,3 +1,4 @@
+import { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function PageHeader({
@@ -8,6 +9,7 @@ export function PageHeader({
   title: string;
   description?: string;
   actions?: ReactNode;
+  icon?: LucideIcon;
 }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:items-center sm:justify-between">

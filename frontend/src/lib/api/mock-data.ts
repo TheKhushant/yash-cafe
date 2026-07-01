@@ -73,6 +73,7 @@ export interface MockDb {
   notifications: AppNotification[];
   scanLogs: ScanLogEntry[];
   venues: Venue[];
+  platformUsers: PlatformUser[];
 }
 
 function seed(): MockDb {
@@ -150,9 +151,35 @@ function seed(): MockDb {
     status: i % 11 === 0 ? "Blocked" : "Active",
     joinedAt: daysFromNow(-(i * 9 + 3), 10),
     totalBookings: (i * 3) % 9,
+    role: "user",
     totalOrders: (i * 5) % 22,
     venueId: i % 3 === 0 ? "venue-2" : DEMO_VENUE_ID,
   }));
+
+  const platformUsers: PlatformUser[] = [
+    {
+      id: "admin-1",
+      name: "Platform Admin",
+      email: "admin@sportsbar.com",
+      role: "admin",
+      status: "Active",
+      joinedAt: new Date().toISOString(),
+      totalBookings: 0,
+      totalOrders: 0,
+      venueId: null,
+    },
+    {
+      id: "super-1",
+      name: "Super Admin",
+      email: "super@sportsbar.com",
+      role: "super_admin",
+      status: "Active",
+      joinedAt: new Date().toISOString(),
+      totalBookings: 0,
+      totalOrders: 0,
+      venueId: null,
+    },
+  ];
 
   const orders: Order[] = Array.from({ length: 46 }).map((_, i) => {
     const itemCount = 1 + (i % 3);
@@ -226,7 +253,7 @@ function seed(): MockDb {
     { id: "venue-5", name: "Fast Break Lounge", city: "Seattle", owner: "Tom Becker", status: "Active", revenue: 76900, createdAt: daysFromNow(-90, 10) },
   ];
 
-  return { orders, menu, events, games, users, bookings, notifications, scanLogs: [], venues };
+  return { orders, menu, events, games, users, bookings, notifications, scanLogs: [], platformUsers, venues };
 }
 
 // Singleton mutable in-memory DB so mutations persist within a session.

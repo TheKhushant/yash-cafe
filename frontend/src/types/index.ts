@@ -88,6 +88,7 @@ export interface PlatformUser {
   totalBookings: number;
   totalOrders: number;
   venueId: string | null;
+  role: "user" | "admin" | "super_admin";
 }
 
 export type BookingStatus =

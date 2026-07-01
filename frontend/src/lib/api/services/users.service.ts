@@ -1,6 +1,6 @@
 import type { Booking, Order, PlatformUser } from "@/types";
 import { apiClient, delay, USE_MOCKS } from "../client";
-import { db } from "../mock-data";
+import { db, uid } from "../mock-data";
 
 function scoped(venueId: string | null): PlatformUser[] {
   const all = db().users;
@@ -35,6 +35,48 @@ export const usersService = {
       return delay({ bookings, orders });
     }
     const { data } = await apiClient.get(`/users/${userId}/history`);
+    return data;
+  },
+
+  async listPlatform(): Promise<PlatformUser[]> {
+    if (USE_MOCKS) {
+      return delay(
+        db().users.filter(
+          (u) => u.role === "admin" || u.role === "super_admin"
+        )
+      );
+    }
+    const { data } = await apiClient.get<PlatformUser[]>("/platform/users");
+    return data;
+  },
+
+  async createPlatform(data: { name: string; email: string; role: string }) {
+    if (USE_MOCKS) {
+      const newUser: PlatformUser = {
+        id: uid("user"),
+        name: data.name,
+        email: data.email,
+        status: "Active",
+        joinedAt: new Date().toISOString(),
+        totalBookings: 0,
+        totalOrders: 0,
+        venueId: null,
+        role: data.role as any,
+      };
+      db().users.push(newUser);
+      return delay(newUser);
+    }
+    const { data: user } = await apiClient.post("/platform/users", data);
+    return user;
+  },
+
+  async setPlatformStatus(id: string, status: "Active" | "Blocked") {
+    if (USE_MOCKS) {
+      const user = db().users.find(u => u.id === id);
+      if (user) user.status = status;
+      return delay(user!);
+    }
+    const { data } = await apiClient.patch(`/platform/users/${id}/status`, { status });
     return data;
   },
 };
