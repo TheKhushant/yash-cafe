@@ -23,7 +23,7 @@ export function setStoredToken(token: string, remember: boolean) {
     localStorage.removeItem(TOKEN_KEY);
   }
 }
- 
+
 export function clearStoredToken() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);

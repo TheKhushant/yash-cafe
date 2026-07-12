@@ -18,7 +18,7 @@ function daysFromNow(days: number, hour = 19): string {
   d.setDate(d.getDate() + days);
   d.setHours(hour, 0, 0, 0);
   return d.toISOString();
-} 
+}
 
 function minutesAgo(min: number): string {
   return new Date(Date.now() - min * 60_000).toISOString();

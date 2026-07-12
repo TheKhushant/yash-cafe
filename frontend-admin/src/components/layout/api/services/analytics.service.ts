@@ -16,7 +16,7 @@ function buildSeries(days: number): TimeSeriesPoint[] {
     });
   }
   return out;
-} 
+}
 
 export const analyticsService = {
   async get(venueId: string | null, rangeDays = 14): Promise<AnalyticsData> {

@@ -10,7 +10,6 @@ import type {
   VenueEvent,
 } from "@/types";
 
-// Primary demo venue used for the Admin role
 export const DEMO_VENUE_ID = "venue-1";
 
 function daysFromNow(days: number, hour = 19): string {
@@ -18,7 +17,7 @@ function daysFromNow(days: number, hour = 19): string {
   d.setDate(d.getDate() + days);
   d.setHours(hour, 0, 0, 0);
   return d.toISOString();
-} 
+}
 
 function minutesAgo(min: number): string {
   return new Date(Date.now() - min * 60_000).toISOString();
@@ -256,8 +255,9 @@ function seed(): MockDb {
   return { orders, menu, events, games, users, bookings, notifications, scanLogs: [], platformUsers, venues };
 }
 
-// Singleton mutable in-memory DB so mutations persist within a session.
+// Mock Database
 let _db: MockDb | null = null;
+
 export function db(): MockDb {
   if (!_db) _db = seed();
   return _db;
