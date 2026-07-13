@@ -1,6 +1,6 @@
 // src/components/layout/Header.tsx
 import { useNavigate, useLocation } from "react-router-dom";
-import { LogOut, Menu, Search } from "lucide-react";
+import { LogOut, Menu, Search, Sun, Moon } from "lucide-react";
 
 import {
   Avatar,
@@ -35,6 +35,9 @@ export function Header() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const setMobileOpen = useUiStore((s) => s.setMobileOpen);
+  const theme = useUiStore((s) => s.theme);
+  const toggleTheme = useUiStore((s) => s.toggleTheme);
+
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -66,8 +69,17 @@ export function Header() {
         <Input placeholder="Search…" className="pl-9" />
       </div>
 
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className="ml-2 grid size-9 place-items-center rounded-lg text-muted-foreground hover:bg-accent"
+        title="Toggle theme"
+      >
+        {theme === 'light' ? <Moon className="size-5" /> : <Sun className="size-5" />}
+      </button>
+
       <DropdownMenu>
-        <DropdownMenuTrigger className="ml-auto flex items-center gap-2.5 rounded-full p-1 pr-3 transition-colors hover:bg-accent md:ml-0">
+        <DropdownMenuTrigger className="ml-2 flex items-center gap-2.5 rounded-full p-1 pr-3 transition-colors hover:bg-accent">
           <Avatar className="size-8">
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
               {initials}

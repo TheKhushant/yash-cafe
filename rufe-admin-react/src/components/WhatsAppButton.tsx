@@ -22,7 +22,7 @@ export default function WhatsAppButton({
       />
 
       {/* Online Dot */}
-      <div className="absolute top-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full flex items-center justify-center">
+      <div className="absolute top-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-background rounded-full flex items-center justify-center">
         <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#25D366] rounded-full animate-pulse" />
       </div>
     </a>

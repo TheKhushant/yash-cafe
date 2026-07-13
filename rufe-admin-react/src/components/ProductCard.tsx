@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <motion.div
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2 }}
-      className="group bg-white rounded-lg sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-lg border border-zinc-100"
+      className="group bg-background rounded-lg sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-lg border border-zinc-100"
     >
       {/* Image */}
       <Link

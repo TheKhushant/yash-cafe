@@ -4,7 +4,7 @@ import { FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="mt-12 border-t border-border bg-white">
+    <footer className="mt-12 border-t border-border bg-background">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {/* Brand Column */}

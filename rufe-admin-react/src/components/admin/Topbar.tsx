@@ -9,7 +9,7 @@ export function Topbar({ onMobileMenuClick }: TopbarProps) {
   const { user, logout } = useAuth();
 
   return (
-    <header className="h-16 border-b border-[#E5E0D8] bg-white/90 backdrop-blur flex items-center justify-between px-4 md:px-6 shadow-sm">
+    <header className="h-16 border-b border-[#E5E0D8] bg-background/90 backdrop-blur flex items-center justify-between px-4 md:px-6 shadow-sm">
       {/* Left Side */}
       <div className="flex items-center gap-3">
         <button

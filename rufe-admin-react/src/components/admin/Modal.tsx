@@ -34,7 +34,7 @@ export function Modal({ open, onClose, title, children, size = "md" }: ModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div
-        className={`${sizeClasses[size]} w-full bg-white border border-[#E5E0D8] rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col`}
+        className={`${sizeClasses[size]} w-full bg-background border border-[#E5E0D8] rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

@@ -26,7 +26,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col bg-zinc-950 text-zinc-200 border-r border-zinc-800">
         {/* Header */}
         <div className="flex h-16 items-center gap-2.5 border-b border-zinc-800 px-4">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white text-zinc-950">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-background text-zinc-950">
             <Trophy className="size-5" />
           </span>
           {!isCollapsed && (
@@ -66,7 +66,7 @@ export function Sidebar() {
                       className={cn(
                         "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                         active
-                          ? "bg-white text-zinc-950 shadow-sm"
+                          ? "bg-background text-zinc-950 shadow-sm"
                           : "text-zinc-300 hover:bg-zinc-900 hover:text-white",
                         isCollapsed && "justify-center px-0"
                       )}

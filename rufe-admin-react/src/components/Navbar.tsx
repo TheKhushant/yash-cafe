@@ -44,7 +44,7 @@ export default function Navbar() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/55 supports-[backdrop-filter]:bg-white/45 border-b border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-background/55 supports-[backdrop-filter]:bg-background/45 border-b border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
 
       <nav className="max-w-7xl mx-auto px-3 sm:px-6 h-[52px] sm:h-16 flex items-center justify-between">
@@ -89,14 +89,14 @@ export default function Navbar() {
         <div className="flex items-center gap-1 sm:gap-2">
           <NavLink
             to="/shop"
-            className="hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/20 text-zinc-600 hover:text-rose-600 transition-all"
+            className="hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-background/40 hover:bg-background/60 backdrop-blur-md border border-white/20 text-zinc-600 hover:text-rose-600 transition-all"
           >
             <Search size={16} className="sm:w-[19px] sm:h-[19px]" />
           </NavLink>
 
           <NavLink
             to="/cart"
-            className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/20 text-zinc-700 hover:text-rose-600 transition-all"
+            className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-background/40 hover:bg-background/60 backdrop-blur-md border border-white/20 text-zinc-700 hover:text-rose-600 transition-all"
           >
             <ShoppingCart size={17} className="sm:w-5 sm:h-5" />
             {count > 0 && (
@@ -108,7 +108,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setOpen((o) => !o)}
-            className="lg:hidden p-1.5 sm:p-2 rounded-xl bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/20 transition-all"
+            className="lg:hidden p-1.5 sm:p-2 rounded-xl bg-background/40 hover:bg-background/60 backdrop-blur-md border border-white/20 transition-all"
           >
             {open ? <X size={20} className="sm:w-6 sm:h-6" /> : <Menu size={20} className="sm:w-6 sm:h-6" />}
           </button>
@@ -119,7 +119,7 @@ export default function Navbar() {
       {open && (
         <div
           ref={menuRef}
-          className="lg:hidden border-t border-white/20 bg-white/70 backdrop-blur-2xl"
+          className="lg:hidden border-t border-white/20 bg-background/70 backdrop-blur-2xl"
         >
           <ul className="px-3 py-3 space-y-1">
             {links.map((l) => (
