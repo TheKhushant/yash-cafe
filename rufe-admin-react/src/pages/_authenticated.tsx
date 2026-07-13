@@ -1,15 +1,11 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuthStore } from "@/stores/auth-store";
 import { setUnauthorizedHandler } from "@/lib/api/client";
 
-export const Route = createFileRoute("/_authenticated")({
-  component: AuthenticatedLayout,
-});
-
-function AuthenticatedLayout() {
+export default function AuthenticatedLayout() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hydrate = useAuthStore((s) => s.hydrate);

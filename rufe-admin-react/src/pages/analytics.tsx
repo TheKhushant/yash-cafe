@@ -1,5 +1,4 @@
 // Create /home/workdir/attachments/yash-cafe-main/src/routes/_authenticated.analytics.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, TrendingUp, Users, Calendar } from "lucide-react";
 import {
@@ -14,13 +13,9 @@ import { analyticsService } from "@/lib/api/services/service";
 import { useAuthStore } from "@/stores/auth-store";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
-export const Route = createFileRoute("/_authenticated/analytics")({
-  component: AnalyticsPage,
-});
-
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
-function AnalyticsPage() {
+export default function AnalyticsPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   
   const analytics = useQuery({

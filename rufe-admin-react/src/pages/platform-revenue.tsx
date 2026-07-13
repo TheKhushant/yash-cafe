@@ -1,5 +1,4 @@
 // src/routes/_authenticated.platform-revenue.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, DollarSign, BarChart3 } from "lucide-react";
 import {
@@ -13,11 +12,7 @@ import { PageSkeleton } from "@/components/shared/Skeletons";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { analyticsService } from "@/lib/api/services/service";
 
-export const Route = createFileRoute("/_authenticated/platform-revenue")({
-  component: PlatformRevenuePage,
-});
-
-function PlatformRevenuePage() {
+export default function PlatformRevenuePage() {
   const platformRevenue = useQuery({
     queryKey: ["platform-revenue"],
     queryFn: () => analyticsService.getPlatformRevenue(), // Platform-wide

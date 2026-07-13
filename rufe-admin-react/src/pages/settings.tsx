@@ -1,5 +1,4 @@
 // Create /home/workdir/attachments/yash-cafe-main/src/routes/_authenticated.settings.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { User, Bell, Clock, Palette, LogOut } from "lucide-react";
 import { toast } from "sonner";
@@ -12,11 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/settings")({
-  component: SettingsPage,
-});
-
-function SettingsPage() {
+export default function SettingsPage() {
   const { user, logout } = useAuthStore();
   const [form, setForm] = useState({
     name: user?.name || "",

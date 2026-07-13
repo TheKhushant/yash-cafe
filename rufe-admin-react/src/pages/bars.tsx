@@ -1,5 +1,4 @@
 // src/routes/_authenticated.bars.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Plus, Building2 } from "lucide-react";
@@ -20,13 +19,9 @@ import { venuesService, type VenueInput } from "@/lib/api/services/venues.servic
 import { formatCurrency } from "@/lib/format";
 import type { Venue } from "@/types";
 
-export const Route = createFileRoute("/_authenticated/bars")({
-  component: BarsPage,
-});
-
 const EMPTY: VenueInput = { name: "", city: "", owner: "", status: "Active" };
 
-function BarsPage() {
+export default function BarsPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Venue | null>(null);

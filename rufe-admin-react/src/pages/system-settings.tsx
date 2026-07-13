@@ -1,5 +1,4 @@
 // src/routes/_authenticated.system-settings.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShieldCheck, Save, Globe, Bell, Users, Database } from "lucide-react";
 import { toast } from "sonner";
@@ -19,11 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/system-settings")({
-  component: SystemSettingsPage,
-});
-
-function SystemSettingsPage() {
+export default function SystemSettingsPage() {
   const [settings, setSettings] = useState({
     platformName: "Sports Bar Admin",
     supportEmail: "support@sportsbar.app",

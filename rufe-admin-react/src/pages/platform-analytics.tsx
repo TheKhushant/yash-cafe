@@ -1,5 +1,4 @@
 // src/routes/_authenticated.platform-analytics.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Building2, Users, Calendar, TrendingUp } from "lucide-react";
 import {
@@ -13,13 +12,9 @@ import { PageSkeleton } from "@/components/shared/Skeletons";
 import { analyticsService } from "@/lib/api/services/service";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
-export const Route = createFileRoute("/_authenticated/platform-analytics")({
-  component: PlatformAnalyticsPage,
-});
-
 const CHART_COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
-function PlatformAnalyticsPage() {
+export default function PlatformAnalyticsPage() {
   const analytics = useQuery({
     queryKey: ["platform-analytics"],
     queryFn: () => analyticsService.getPlatformAnalytics(),

@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Plus } from "lucide-react";
@@ -21,13 +20,9 @@ import { formatDateTime, toDatetimeLocal } from "@/lib/format";
 import type { Game } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/games")({
-  component: GamesPage,
-});
-
 const EMPTY: GameInput = { title: "", league: "", schedule: new Date().toISOString(), enabled: true };
 
-function GamesPage() {
+export default function GamesPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

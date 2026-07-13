@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { CalendarDays, Plus, Users } from "lucide-react";
@@ -26,15 +25,11 @@ import { formatCurrencyPrecise, formatDateTime, toDatetimeLocal } from "@/lib/fo
 import type { VenueEvent } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/events")({
-  component: EventsPage,
-});
-
 const EMPTY: EventInput = {
   title: "", description: "", date: new Date().toISOString(), ticketPrice: 0, capacity: 50, status: "Draft",
 };
 
-function EventsPage() {
+export default function EventsPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

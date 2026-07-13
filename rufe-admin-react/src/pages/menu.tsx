@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
@@ -25,15 +24,11 @@ import { formatCurrencyPrecise } from "@/lib/format";
 import type { MenuItem } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/menu")({
-  component: MenuPage,
-});
-
 const EMPTY: MenuInput = {
   name: "", category: "Mains", price: 0, stock: 0, enabled: true, description: "",
 };
 
-function MenuPage() {
+export default function MenuPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [editing, setEditing] = useState<MenuItem | null>(null);

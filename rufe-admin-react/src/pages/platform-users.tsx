@@ -1,5 +1,4 @@
 // src/routes/_authenticated.platform-users.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { UsersRound, Plus, Shield, UserCheck } from "lucide-react";
@@ -31,11 +30,7 @@ import { usersService } from "@/lib/api/services/users.service"; // Platform-lev
 import { formatDate } from "@/lib/format";
 import type { PlatformUser } from "@/types";
 
-export const Route = createFileRoute("/_authenticated/platform-users")({
-  component: PlatformUsersPage,
-});
-
-function PlatformUsersPage() {
+export default function PlatformUsersPage() {
   const qc = useQueryClient();
   const [activeUser, setActiveUser] = useState<PlatformUser | null>(null);
   const [open, setOpen] = useState(false);

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
@@ -30,10 +30,6 @@ import { analyticsService } from "@/lib/api/services/service";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
-  component: DashboardPage,
-});
-
 const QUICK_ACTIONS = [
   { label: "New Event", to: "/events", icon: CalendarDays },
   { label: "Add Menu Item", to: "/menu", icon: UtensilsCrossed },
@@ -41,7 +37,7 @@ const QUICK_ACTIONS = [
   { label: "View Orders", to: "/orders", icon: Receipt },
 ] as const;
 
-function DashboardPage() {
+export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const venueScope = useAuthStore((s) => s.venueScope);
   const scope = venueScope();

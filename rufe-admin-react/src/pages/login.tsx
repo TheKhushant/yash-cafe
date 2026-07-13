@@ -1,5 +1,5 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { AlertCircle, Loader2, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,7 @@ import { Card } from "@/components/ui/card";
 import { DEMO_LOGINS } from "@/lib/api/services/auth.service";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
-});
-
-function LoginPage() {
+export default function LoginPage() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -39,7 +35,7 @@ function LoginPage() {
     setLoading(true);
     try {
       await login(email, password, remember);
-      navigate({ to: "/dashboard" });
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

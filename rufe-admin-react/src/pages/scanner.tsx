@@ -1,5 +1,4 @@
 // Create /home/workdir/attachments/yash-cafe-main/src/routes/_authenticated.scanner.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { CheckCircle, XCircle, RefreshCw, QrCode, User, Calendar, MapPin } from "lucide-react";
@@ -12,11 +11,7 @@ import { bookingsService } from "@/lib/api/services/bookings.service";
 import { useAuthStore } from "@/stores/auth-store";
 import type { CheckInResult } from "@/lib/api/services/bookings.service";
 
-export const Route = createFileRoute("/_authenticated/scanner")({
-  component: QRScannerPage,
-});
-
-function QRScannerPage() {
+export default function QRScannerPage() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [scanHistory, setScanHistory] = useState<any[]>([]);

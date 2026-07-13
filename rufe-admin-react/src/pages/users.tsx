@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,11 +15,7 @@ import { formatCurrencyPrecise, formatDate } from "@/lib/format";
 import type { PlatformUser } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/users")({
-  component: UsersPage,
-});
-
-function UsersPage() {
+export default function UsersPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [active, setActive] = useState<PlatformUser | null>(null);

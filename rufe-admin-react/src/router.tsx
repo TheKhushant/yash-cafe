@@ -1,490 +1,94 @@
-﻿// src/router.tsx
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { Login } from "@/pages/Login";
+import { setUnauthorizedHandler } from "@/lib/api/client";
+import AnalyticsPage from "@/pages/analytics";
+import BarsPage from "@/pages/bars";
+import DashboardPage from "@/pages/dashboard";
+import EventsPage from "@/pages/events";
+import GamesPage from "@/pages/games";
+import LoginPage from "@/pages/login";
+import MenuPage from "@/pages/menu";
+import NotificationsPage from "@/pages/notifications";
+import OrdersPage from "@/pages/orders";
+import PlatformAnalyticsPage from "@/pages/platform-analytics";
+import PlatformRevenuePage from "@/pages/platform-revenue";
+import PlatformUsersPage from "@/pages/platform-users";
+import ScannerPage from "@/pages/scanner";
+import SettingsPage from "@/pages/settings";
+import SystemSettingsPage from "@/pages/system-settings";
+import UsersPage from "@/pages/users";
+import { useAuthStore } from "@/stores/auth-store";
 
-// Lazy-loaded page components (recommended)
-const Dashboard = lazy(() => import("@/pages/dashboard"));
-const Events = lazy(() => import("@/pages/events"));
-const Menu = lazy(() => import("@/pages/menu"));
-const Orders = lazy(() => import("@/pages/orders"));
-const Scanner = lazy(() => import("@/pages/scanner"));
-// ... import other pages
-
-const queryClient = new QueryClient();
-
-const router = createBrowserRouter([
-  {
-    path: "/login",
-    element: <Login />,
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+    },
   },
-  {
-    path: "/",
-    element: <AppShell />,
-    children: [
-      { index: true, element: <Dashboard /> },
-      { path: "dashboard", element: <Dashboard /> },
-      { path: "events", element: <Events /> },
-      { path: "menu", element: <Menu /> },
-      { path: "orders", element: <Orders /> },
-      { path: "scanner", element: <Scanner /> },
-      { path: "analytics", element: <AnalyticsPage /> },
-      { path: "games", element: <GamesPage /> },
-      { path: "notifications", element: <NotificationsPage /> },
-      { path: "settings", element: <SettingsPage /> },
-      // Add more protected routes here
-    ],
-  },
-]);
+});
+
+function AuthenticatedLayout() {
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hydrate = useAuthStore((state) => state.hydrate);
+  const logout = useAuthStore((state) => state.logout);
+
+  useEffect(() => {
+    hydrate();
+    setUnauthorizedHandler(() => logout());
+  }, [hydrate, logout]);
+
+  if (!hydrated) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+}
 
 export function AppRouter() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+
+          <Route element={<AuthenticatedLayout />}>
+            <Route element={<AppShell />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/menu" element={<MenuPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/scanner" element={<ScannerPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/games" element={<GamesPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/bars" element={<BarsPage />} />
+              <Route path="/platform-users" element={<PlatformUsersPage />} />
+              <Route path="/platform-revenue" element={<PlatformRevenuePage />} />
+              <Route path="/platform-analytics" element={<PlatformAnalyticsPage />} />
+              <Route path="/system-settings" element={<SystemSettingsPage />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
     </QueryClientProvider>
   );
-}
-
-/* eslint-disable */
-
-// @ts-nocheck
-
-// noinspection JSUnusedGlobalSymbols
-
-// This file was automatically generated by TanStack Router.
-// You should NOT make any changes in this file as it will be overwritten.
-// Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
-
-import { Route as rootRouteImport } from './pages/__root.tsx'
-import { Route as LoginRouteImport } from './pages/login.tsx'
-import { Route as AuthenticatedRouteImport } from './pages/_authenticated.tsx'
-import { Route as IndexRouteImport } from './pages/index'
-import { Route as AuthenticatedUsersRouteImport } from './pages/users.tsx'
-import { Route as AuthenticatedSystemSettingsRouteImport } from './pages/system-settings.tsx'
-import { Route as AuthenticatedSettingsRouteImport } from './pages/settings.tsx'
-import { Route as AuthenticatedScannerRouteImport } from './pages/scanner.tsx'
-import { Route as AuthenticatedPlatformUsersRouteImport } from './pages/platform-users.tsx'
-import { Route as AuthenticatedPlatformRevenueRouteImport } from './pages/platform-revenue.tsx'
-import { Route as AuthenticatedPlatformAnalyticsRouteImport } from './pages/platform-analytics.tsx'
-import { Route as AuthenticatedOrdersRouteImport } from './pages/orders.tsx'
-import { Route as AuthenticatedNotificationsRouteImport } from './pages/notifications.tsx'
-import { Route as AuthenticatedMenuRouteImport } from './pages/menu.tsx'
-import { Route as AuthenticatedGamesRouteImport } from './pages/games.tsx'
-import { Route as AuthenticatedEventsRouteImport } from './pages/events.tsx'
-import { Route as AuthenticatedDashboardRouteImport } from './pages/dashboard.tsx'
-import { Route as AuthenticatedBarsRouteImport } from './pages/bars.tsx'
-import { Route as AuthenticatedAnalyticsRouteImport } from './pages/analytics.tsx'
-
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedSystemSettingsRoute =
-  AuthenticatedSystemSettingsRouteImport.update({
-    id: '/system-settings',
-    path: '/system-settings',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedScannerRoute = AuthenticatedScannerRouteImport.update({
-  id: '/scanner',
-  path: '/scanner',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedPlatformUsersRoute =
-  AuthenticatedPlatformUsersRouteImport.update({
-    id: '/platform-users',
-    path: '/platform-users',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedPlatformRevenueRoute =
-  AuthenticatedPlatformRevenueRouteImport.update({
-    id: '/platform-revenue',
-    path: '/platform-revenue',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedPlatformAnalyticsRoute =
-  AuthenticatedPlatformAnalyticsRouteImport.update({
-    id: '/platform-analytics',
-    path: '/platform-analytics',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedNotificationsRoute =
-  AuthenticatedNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedMenuRoute = AuthenticatedMenuRouteImport.update({
-  id: '/menu',
-  path: '/menu',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedGamesRoute = AuthenticatedGamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedBarsRoute = AuthenticatedBarsRouteImport.update({
-  id: '/bars',
-  path: '/bars',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/bars': typeof AuthenticatedBarsRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/events': typeof AuthenticatedEventsRoute
-  '/games': typeof AuthenticatedGamesRoute
-  '/menu': typeof AuthenticatedMenuRoute
-  '/notifications': typeof AuthenticatedNotificationsRoute
-  '/orders': typeof AuthenticatedOrdersRoute
-  '/platform-analytics': typeof AuthenticatedPlatformAnalyticsRoute
-  '/platform-revenue': typeof AuthenticatedPlatformRevenueRoute
-  '/platform-users': typeof AuthenticatedPlatformUsersRoute
-  '/scanner': typeof AuthenticatedScannerRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/system-settings': typeof AuthenticatedSystemSettingsRoute
-  '/users': typeof AuthenticatedUsersRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/bars': typeof AuthenticatedBarsRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/events': typeof AuthenticatedEventsRoute
-  '/games': typeof AuthenticatedGamesRoute
-  '/menu': typeof AuthenticatedMenuRoute
-  '/notifications': typeof AuthenticatedNotificationsRoute
-  '/orders': typeof AuthenticatedOrdersRoute
-  '/platform-analytics': typeof AuthenticatedPlatformAnalyticsRoute
-  '/platform-revenue': typeof AuthenticatedPlatformRevenueRoute
-  '/platform-users': typeof AuthenticatedPlatformUsersRoute
-  '/scanner': typeof AuthenticatedScannerRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/system-settings': typeof AuthenticatedSystemSettingsRoute
-  '/users': typeof AuthenticatedUsersRoute
-}
-export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/login': typeof LoginRoute
-  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
-  '/_authenticated/bars': typeof AuthenticatedBarsRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/events': typeof AuthenticatedEventsRoute
-  '/_authenticated/games': typeof AuthenticatedGamesRoute
-  '/_authenticated/menu': typeof AuthenticatedMenuRoute
-  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
-  '/_authenticated/orders': typeof AuthenticatedOrdersRoute
-  '/_authenticated/platform-analytics': typeof AuthenticatedPlatformAnalyticsRoute
-  '/_authenticated/platform-revenue': typeof AuthenticatedPlatformRevenueRoute
-  '/_authenticated/platform-users': typeof AuthenticatedPlatformUsersRoute
-  '/_authenticated/scanner': typeof AuthenticatedScannerRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/system-settings': typeof AuthenticatedSystemSettingsRoute
-  '/_authenticated/users': typeof AuthenticatedUsersRoute
-}
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/login'
-    | '/analytics'
-    | '/bars'
-    | '/dashboard'
-    | '/events'
-    | '/games'
-    | '/menu'
-    | '/notifications'
-    | '/orders'
-    | '/platform-analytics'
-    | '/platform-revenue'
-    | '/platform-users'
-    | '/scanner'
-    | '/settings'
-    | '/system-settings'
-    | '/users'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/login'
-    | '/analytics'
-    | '/bars'
-    | '/dashboard'
-    | '/events'
-    | '/games'
-    | '/menu'
-    | '/notifications'
-    | '/orders'
-    | '/platform-analytics'
-    | '/platform-revenue'
-    | '/platform-users'
-    | '/scanner'
-    | '/settings'
-    | '/system-settings'
-    | '/users'
-  id:
-    | '__root__'
-    | '/'
-    | '/_authenticated'
-    | '/login'
-    | '/_authenticated/analytics'
-    | '/_authenticated/bars'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/events'
-    | '/_authenticated/games'
-    | '/_authenticated/menu'
-    | '/_authenticated/notifications'
-    | '/_authenticated/orders'
-    | '/_authenticated/platform-analytics'
-    | '/_authenticated/platform-revenue'
-    | '/_authenticated/platform-users'
-    | '/_authenticated/scanner'
-    | '/_authenticated/settings'
-    | '/_authenticated/system-settings'
-    | '/_authenticated/users'
-  fileRoutesById: FileRoutesById
-}
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  LoginRoute: typeof LoginRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/users': {
-      id: '/_authenticated/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AuthenticatedUsersRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/system-settings': {
-      id: '/_authenticated/system-settings'
-      path: '/system-settings'
-      fullPath: '/system-settings'
-      preLoaderRoute: typeof AuthenticatedSystemSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/scanner': {
-      id: '/_authenticated/scanner'
-      path: '/scanner'
-      fullPath: '/scanner'
-      preLoaderRoute: typeof AuthenticatedScannerRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/platform-users': {
-      id: '/_authenticated/platform-users'
-      path: '/platform-users'
-      fullPath: '/platform-users'
-      preLoaderRoute: typeof AuthenticatedPlatformUsersRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/platform-revenue': {
-      id: '/_authenticated/platform-revenue'
-      path: '/platform-revenue'
-      fullPath: '/platform-revenue'
-      preLoaderRoute: typeof AuthenticatedPlatformRevenueRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/platform-analytics': {
-      id: '/_authenticated/platform-analytics'
-      path: '/platform-analytics'
-      fullPath: '/platform-analytics'
-      preLoaderRoute: typeof AuthenticatedPlatformAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/orders': {
-      id: '/_authenticated/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/notifications': {
-      id: '/_authenticated/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/menu': {
-      id: '/_authenticated/menu'
-      path: '/menu'
-      fullPath: '/menu'
-      preLoaderRoute: typeof AuthenticatedMenuRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/games': {
-      id: '/_authenticated/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof AuthenticatedGamesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/events': {
-      id: '/_authenticated/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof AuthenticatedEventsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/bars': {
-      id: '/_authenticated/bars'
-      path: '/bars'
-      fullPath: '/bars'
-      preLoaderRoute: typeof AuthenticatedBarsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/analytics': {
-      id: '/_authenticated/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-  }
-}
-
-interface AuthenticatedRouteChildren {
-  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
-  AuthenticatedBarsRoute: typeof AuthenticatedBarsRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
-  AuthenticatedGamesRoute: typeof AuthenticatedGamesRoute
-  AuthenticatedMenuRoute: typeof AuthenticatedMenuRoute
-  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
-  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
-  AuthenticatedPlatformAnalyticsRoute: typeof AuthenticatedPlatformAnalyticsRoute
-  AuthenticatedPlatformRevenueRoute: typeof AuthenticatedPlatformRevenueRoute
-  AuthenticatedPlatformUsersRoute: typeof AuthenticatedPlatformUsersRoute
-  AuthenticatedScannerRoute: typeof AuthenticatedScannerRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedSystemSettingsRoute: typeof AuthenticatedSystemSettingsRoute
-  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
-}
-
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
-  AuthenticatedBarsRoute: AuthenticatedBarsRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedEventsRoute: AuthenticatedEventsRoute,
-  AuthenticatedGamesRoute: AuthenticatedGamesRoute,
-  AuthenticatedMenuRoute: AuthenticatedMenuRoute,
-  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
-  AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
-  AuthenticatedPlatformAnalyticsRoute: AuthenticatedPlatformAnalyticsRoute,
-  AuthenticatedPlatformRevenueRoute: AuthenticatedPlatformRevenueRoute,
-  AuthenticatedPlatformUsersRoute: AuthenticatedPlatformUsersRoute,
-  AuthenticatedScannerRoute: AuthenticatedScannerRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedSystemSettingsRoute: AuthenticatedSystemSettingsRoute,
-  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
-}
-
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
-
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  LoginRoute: LoginRoute,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
 }
 

@@ -1,5 +1,4 @@
 // Create /home/workdir/attachments/yash-cafe-main/src/routes/_authenticated.notifications.tsx
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Bell, Plus, Send, Trash2 } from "lucide-react";
@@ -33,10 +32,6 @@ import { formatDateTime } from "@/lib/format";
 import type { AppNotification } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/notifications")({
-  component: NotificationsPage,
-});
-
 const EMPTY: NotificationInput = {
   title: "",
   message: "",
@@ -44,7 +39,7 @@ const EMPTY: NotificationInput = {
   audience: "All",
 };
 
-function NotificationsPage() {
+export default function NotificationsPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

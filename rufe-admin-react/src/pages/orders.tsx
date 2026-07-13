@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -28,15 +27,11 @@ import { formatCurrencyPrecise, relativeTime } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
-export const Route = createFileRoute("/_authenticated/orders")({
-  component: OrdersPage,
-});
-
 const STATUSES: OrderStatus[] = [
   "Pending", "Accepted", "Preparing", "Ready", "Completed", "Cancelled",
 ];
 
-function OrdersPage() {
+export default function OrdersPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [active, setActive] = useState<Order | null>(null);

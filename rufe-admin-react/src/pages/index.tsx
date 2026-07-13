@@ -1,5 +1,5 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { Navigate } from "react-router-dom";
 
-export const Route = createFileRoute("/")({
-  component: () => <Navigate to="/dashboard" />,
-});
+export default function IndexPage() {
+  return <Navigate to="/dashboard" replace />;
+}
