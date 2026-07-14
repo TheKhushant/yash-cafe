@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUiStore } from "@/stores/ui-store";
 
+
+
 export function Sidebar() {
   const user = useAuthStore((s) => s.user);
   const collapsed = useUiStore((s) => s.sidebarCollapsed);

@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { ShoppingCart, Menu, X, Search } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useCart } from "@/lib/cart";
+import { useCart } from "@/lib/api/cart";
 
 const links = [
   { to: "/", label: "Home" },

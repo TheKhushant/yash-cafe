@@ -50,6 +50,7 @@ export const authService = {
     const { data } = await apiClient.post<LoginResponse>("/auth/login", { email, password });
     return data;
   },
+  
 
   async me(): Promise<AuthUser> {
     if (USE_MOCKS) {
@@ -59,6 +60,25 @@ export const authService = {
     return data;
   },
 };
+
+  export function useAuth() {
+    return {
+      user: {
+        id: "1",
+        name: "Admin",
+        email: "admin@example.com",
+        role: "admin",
+      },
+
+      isAuthenticated: true,
+      loading: false,
+
+      logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      },
+    };
+  }
 
 export const DEMO_LOGINS: Array<{ label: string; email: string; password: string; role: Role }> = [
   { label: "Admin", email: "admin@sportsbar.app", password: "password", role: "admin" },

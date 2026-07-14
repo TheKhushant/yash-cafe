@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/api/services/auth";
 
 export function useRequireAuth() {
   const { isAuthenticated, loading } = useAuth();

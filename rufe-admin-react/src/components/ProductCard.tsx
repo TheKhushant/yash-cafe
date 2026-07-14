@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShoppingCart, Star } from "lucide-react";
-import { useCart } from "@/lib/cart";
+import { useCart } from "@/lib/api/cart";
 import { toast } from "sonner";
 
 type Product = {

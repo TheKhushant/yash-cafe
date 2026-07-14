@@ -1,4 +1,5 @@
 import axios from "axios";
+import { AxiosHeaders } from "axios";
 
 // Toggle between mock data and a real backend.
 // Set VITE_USE_MOCKS=false and VITE_API_BASE_URL=<your api> to hit the real API.
@@ -36,9 +37,9 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = getStoredToken();
-  if (token) {
-    config.headers = config.headers ?? {};
+    const token = getStoredToken();
+    if (token) {
+    config.headers = config.headers ?? new AxiosHeaders();
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
