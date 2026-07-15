@@ -28,8 +28,9 @@ import type { Order, OrderStatus } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
 const STATUSES: OrderStatus[] = [
-  "Pending", "Accepted", "Preparing", "Ready", "Completed", "Cancelled",
+   "Order Recived", "Paid", "Cancelled",
 ];
+// "Pending", 
 
 export default function OrdersPage() {
   const scope = useAuthStore((s) => s.venueScope)();

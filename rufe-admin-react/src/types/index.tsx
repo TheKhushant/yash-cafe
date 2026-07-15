@@ -16,11 +16,8 @@ export interface LoginResponse {
 }
 
 export type OrderStatus =
-  | "Pending"
-  | "Accepted"
-  | "Preparing"
-  | "Ready"
-  | "Completed"
+  | "Order Recived"
+  | "Paid"
   | "Cancelled";
 
 export interface OrderItem {
