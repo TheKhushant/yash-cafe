@@ -106,35 +106,156 @@ export default function MenuPage() {
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit item" : "Add item"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Edit Item" : "Add Item"}
+            </DialogTitle>
           </DialogHeader>
+
           <div className="grid gap-4 sm:grid-cols-2">
+
+            {/* Name */}
             <div className="space-y-2 sm:col-span-2">
               <Label>Name</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input
+                value={form.name}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
+              />
             </div>
+
+            {/* Category */}
             <div className="space-y-2">
               <Label>Category</Label>
-              <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              <Input
+                value={form.category}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value })
+                }
+              />
             </div>
+
+            {/* Price */}
             <div className="space-y-2">
               <Label>Price</Label>
-              <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+              <Input
+                type="number"
+                step="0.01"
+                value={form.price}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    price: Number(e.target.value),
+                  })
+                }
+              />
             </div>
+
+            {/* Stock */}
             <div className="space-y-2">
               <Label>Stock</Label>
-              <Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} />
+              <Input
+                type="number"
+                value={form.stock}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    stock: Number(e.target.value),
+                  })
+                }
+              />
             </div>
-            <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+
+            {/* Image */}
+            <div className="space-y-2">
+              <Label>Image</Label>
+
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const reader = new FileReader();
+
+                  reader.onloadend = () => {
+                    setForm({
+                      ...form,
+                      image: reader.result as string,
+                    });
+                  };
+
+                  reader.readAsDataURL(file);
+                }}
+              />
+
+              {form.image && (
+                <img
+                  src={form.image}
+                  alt="Preview"
+                  className="h-24 w-24 rounded-lg border object-cover"
+                />
+              )}
+            </div>
+
+            {/* Enabled */}
+            <div className="flex items-center justify-between rounded-lg border px-3 py-3">
               <Label>Enabled</Label>
-              <Switch checked={form.enabled} onCheckedChange={(v) => setForm({ ...form, enabled: v })} />
+              <Switch
+                checked={form.enabled}
+                onCheckedChange={(v) =>
+                  setForm({ ...form, enabled: v })
+                }
+              />
             </div>
+
+            {/* Customer Favourite */}
+            <div className="flex items-center justify-between rounded-lg border px-3 py-3">
+              <Label>Customer Favourite</Label>
+              <Switch
+                checked={form.isFavourite}
+                onCheckedChange={(v) =>
+                  setForm({
+                    ...form,
+                    isFavourite: v,
+                  })
+                }
+              />
+            </div>
+
+            {/* Most Ordered */}
+            <div className="flex items-center justify-between rounded-lg border px-3 py-3 sm:col-span-2">
+              <Label>Most Ordered Dish</Label>
+              <Switch
+                checked={form.isMostOrdered}
+                onCheckedChange={(v) =>
+                  setForm({
+                    ...form,
+                    isMostOrdered: v,
+                  })
+                }
+              />
+            </div>
+
           </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => save.mutate()} disabled={!form.name || save.isPending}>Save</Button>
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              onClick={() => save.mutate()}
+              disabled={!form.name || save.isPending}
+            >
+              Save
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
