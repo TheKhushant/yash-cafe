@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, Heart } from "lucide-react";
+
 import { toast } from "sonner";
 
 import { DataTable, type Column } from "@/components/shared/DataTable";
@@ -225,7 +226,18 @@ export default function MenuPage() {
 
             {/* Customer Favourite */}
             <div className="flex items-center justify-between rounded-lg border px-3 py-3">
-              <Label>Customer Favourite</Label>
+              <div className="flex items-center gap-2">
+                <Label>Customer Favourite</Label>
+
+                <Heart
+                  className={`h-5 w-5 transition-colors ${
+                    form.isFavourite
+                      ? "fill-red-500 text-red-500"
+                      : "fill-transparent text-red-800"
+                  }`}
+                />
+              </div>
+
               <Switch
                 checked={form.isFavourite}
                 onCheckedChange={(v) =>

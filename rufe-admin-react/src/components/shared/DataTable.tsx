@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ArrowDown, ArrowUp,ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -122,11 +122,13 @@ export function DataTable<T>({
                       {col.header}
                       {sortKey === col.key ? (
                         sortDir === "asc" ? (
-                          <ArrowUp className="size-3.5" />
+                          <ArrowUp className="size-3.5 text-primary" />
                         ) : (
-                          <ArrowDown className="size-3.5" />
+                          <ArrowDown className="size-3.5 text-primary" />
                         )
-                      ) : null}
+                      ) : (
+                        <ArrowUpDown className="size-3.5 text-muted-foreground opacity-60" />
+                      )}
                     </button>
                   ) : (
                     col.header
