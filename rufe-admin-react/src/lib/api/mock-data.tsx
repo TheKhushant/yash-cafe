@@ -59,7 +59,7 @@ const menuCatalog: Array<[string, string, number]> = [
 ];
 
 const orderStatuses: Order["status"][] = [
-  "Pending", "Accepted", "Preparing", "Ready", "Completed", "Cancelled",
+  "Paid", "Order Recived", "Cancelled",
 ];
 
 export interface MockDb {
