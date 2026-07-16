@@ -65,6 +65,7 @@ export interface VenueEvent {
   bannerUrl?: string;
   status: EventStatus;
   venueId: string;
+  image?: string;
 }
 
 export interface Game {

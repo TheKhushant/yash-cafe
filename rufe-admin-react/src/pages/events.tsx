@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { CalendarDays, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
-
+import QRCode from "react-qr-code";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageSkeleton } from "@/components/shared/Skeletons";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { db } from "@/lib/api/mock-data";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,8 @@ export default function EventsPage() {
   const [editing, setEditing] = useState<VenueEvent | null>(null);
   const [form, setForm] = useState<EventInput>(EMPTY);
   const [toDelete, setToDelete] = useState<VenueEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<VenueEvent | null>(null);
+  const [openApplicants, setOpenApplicants] = useState(false);
 
   const events = useQuery({ queryKey: ["events", scope], queryFn: () => eventsService.list(scope) });
   const invalidate = () => { qc.invalidateQueries({ queryKey: ["events"] }); qc.invalidateQueries({ queryKey: ["dashboard-stats"] }); };
@@ -60,6 +63,23 @@ export default function EventsPage() {
     setOpen(true);
   }
 
+  function getApplicants(eventId: string) {
+  return (db().bookings ?? [])
+    .filter((b) => b.eventId === eventId)
+    .map((booking) => {
+      const user = db().users.find((u) => u.id === booking.userId);
+
+      return {
+        bookingId: booking.id,
+        name: user?.name ?? booking.customerName,
+        email: user?.email ?? "-",
+        table: booking.tableNumber,
+        paymentStatus: booking.paymentStatus,
+        status: booking.status,
+      };
+    });
+}
+
   if (events.isLoading) return <PageSkeleton />;
 
   return (
@@ -78,15 +98,64 @@ export default function EventsPage() {
               <StatusBadge status={e.status} />
             </div>
             <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{e.description}</p>
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground"><CalendarDays className="size-4" />{formatDateTime(e.date)}</div>
-              <div className="flex items-center gap-2 text-muted-foreground"><Users className="size-4" />{e.attendance}/{e.capacity} attending • {formatCurrencyPrecise(e.ticketPrice)}</div>
-              <Progress value={(e.attendance / e.capacity) * 100} className="h-1.5" />
+            {e.image && (
+              <img
+                src={e.image}
+                className="mb-4 h-44 w-full rounded-lg object-cover"
+              />
+            )}
+            <div className="mt-4 grid grid-cols-5 gap-4 items-center">
+            {/* Left : 3 Parts */}
+            <div className="col-span-3 space-y-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarDays className="size-4" />
+                <span>{formatDateTime(e.date)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users className="size-4" />
+                <span>
+                  {e.attendance}/{e.capacity} Attending
+                </span>
+              </div>
+              <div className="text-sm font-semibold">
+                {formatCurrencyPrecise(e.ticketPrice)}
+              </div>
+              <Progress
+                value={(e.attendance / e.capacity) * 100}
+                className="h-2"
+              />
             </div>
-            <div className="mt-4 flex items-center gap-2 border-t pt-4">
+            {/* Right : 2 Parts */}
+            <div className="col-span-2 flex justify-center">
+              <div className="rounded-lg border bg-white p-2 shadow-sm">
+                <QRCode
+                  size={72}
+                  value={JSON.stringify({
+                    id: e.id,
+                    title: e.title,
+                    date: e.date,
+                    price: e.ticketPrice,
+                    capacity: e.capacity,
+                    attendance: e.attendance,
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
               <Button variant="outline" size="sm" onClick={() => openEdit(e)}>Edit</Button>
               <Button variant="ghost" size="sm" onClick={() => patch.mutate({ id: e.id, data: { status: e.status === "Published" ? "Draft" : "Published" } })}>
                 {e.status === "Published" ? "Unpublish" : "Publish"}
+              </Button>
+              <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={()=>{
+                      setSelectedEvent(e);
+                      setOpenApplicants(true);
+                  }}
+              >
+                  Applicants
               </Button>
               <Button variant="ghost" size="sm" className="ml-auto text-destructive" onClick={() => setToDelete(e)}>Delete</Button>
             </div>
@@ -100,6 +169,36 @@ export default function EventsPage() {
           <div className="grid gap-4">
             <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
             <div className="space-y-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+            <div className="space-y-2">
+              <Label>Event Image</Label>
+
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const reader = new FileReader();
+
+                  reader.onloadend = () => {
+                    setForm({
+                      ...form,
+                      image: reader.result as string,
+                    });
+                  };
+
+                  reader.readAsDataURL(file);
+                }}
+              />
+
+              {form.image && (
+                <img
+                  src={form.image}
+                  className="h-32 w-full rounded-lg object-cover border"
+                />
+              )}
+            </div>
             <div className="space-y-2"><Label>Date & time</Label><Input type="datetime-local" value={toDatetimeLocal(form.date)} onChange={(e) => setForm({ ...form, date: new Date(e.target.value).toISOString() })} /></div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Ticket price</Label><Input type="number" step="0.01" value={form.ticketPrice} onChange={(e) => setForm({ ...form, ticketPrice: Number(e.target.value) })} /></div>
@@ -111,6 +210,59 @@ export default function EventsPage() {
             <Button onClick={() => save.mutate()} disabled={!form.title || save.isPending}>Save</Button>
           </DialogFooter>
         </DialogContent>
+      </Dialog>
+
+      <Dialog
+          open={openApplicants}
+          onOpenChange={setOpenApplicants}
+      >
+          <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                  <DialogTitle>
+                      {selectedEvent?.title}
+                  </DialogTitle>
+              </DialogHeader>
+
+              <div className="max-h-[450px] overflow-auto">
+                  <table className="w-full text-sm">
+                      <thead>
+                          <tr className="border-b">
+                              <th className="p-3 text-left">Name</th>
+                              <th className="p-3 text-left">Email</th>
+                              <th className="p-3 text-left">Table</th>
+                              <th className="p-3 text-left">Payment</th>
+                              <th className="p-3 text-left">Status</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {selectedEvent &&
+                              getApplicants(selectedEvent.id).map((a)=>(
+                                  <tr
+                                      key={a.bookingId}
+                                      className="border-b"
+                                  >
+                                      <td className="p-3">{a.name}</td>
+                                      <td className="p-3">{a.email}</td>
+                                      <td className="p-3">{a.table}</td>
+                                      <td className="p-3">
+                                          {a.paymentStatus}
+                                      </td>
+                                      <td className="p-3">
+                                          {a.status}
+                                      </td>
+                                  </tr>
+                              ))
+                          }
+                      </tbody>
+                  </table>
+                  {selectedEvent &&
+                      getApplicants(selectedEvent.id).length===0 && (
+                      <div className="py-10 text-center text-muted-foreground">
+                          No applicants yet.
+                      </div>
+                  )}
+              </div>
+          </DialogContent>
       </Dialog>
 
       <ConfirmDialog
