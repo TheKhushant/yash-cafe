@@ -19,7 +19,7 @@ import ScannerPage from "@/pages/scanner";
 import SettingsPage from "@/pages/settings";
 import SystemSettingsPage from "@/pages/system-settings";
 import UsersPage from "@/pages/users";
-import IndexPage from "@/pages/index";
+// import IndexPage from "@/pages/index";
 
 import { AppShell } from "./components/layout/AppShell";
 import { useAuthStore } from "./stores/auth-store";
@@ -75,7 +75,7 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<IndexPage />} />
+            {/* <Route index element={<IndexPage />} /> */}
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="events" element={<EventsPage />} />
             <Route path="menu" element={<MenuPage />} />
