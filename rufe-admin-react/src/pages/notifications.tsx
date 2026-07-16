@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { notificationsService, type NotificationInput } from "@/lib/api/services/notifications.service";
+import { notificationsService, type NotificationInput } from "@/lib/api/services/notifications";
 import { formatDateTime } from "@/lib/format";
 import type { AppNotification } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";

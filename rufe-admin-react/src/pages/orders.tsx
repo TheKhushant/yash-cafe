@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ordersService } from "@/lib/api/services/orders.service";
+import { ordersService } from "@/lib/api/services/orders";
 import { formatCurrencyPrecise, relativeTime } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";

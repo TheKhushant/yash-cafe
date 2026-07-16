@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { bookingsService } from "@/lib/api/services/bookings.service";
+import { bookingsService } from "@/lib/api/services/bookings";
 import { useAuthStore } from "@/stores/auth-store";
-import type { CheckInResult } from "@/lib/api/services/bookings.service";
+import type { CheckInResult } from "@/lib/api/services/bookings";
 
 export default function QRScannerPage() {
   const [scanning, setScanning] = useState(false);

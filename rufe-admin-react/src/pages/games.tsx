@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { gamesService, type GameInput } from "@/lib/api/services/games.service";
+import { gamesService, type GameInput } from "@/lib/api/services/games";
 import { formatDateTime, toDatetimeLocal } from "@/lib/format";
 import type { Game } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";

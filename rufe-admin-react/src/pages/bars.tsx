@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { venuesService, type VenueInput } from "@/lib/api/services/venues.service";
+import { venuesService, type VenueInput } from "@/lib/api/services/venues";
 import { formatCurrency } from "@/lib/format";
 import type { Venue } from "@/types";
 

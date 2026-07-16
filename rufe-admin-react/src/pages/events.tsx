@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { eventsService, type EventInput } from "@/lib/api/services/events.service";
+import { eventsService, type EventInput } from "@/lib/api/services/events";
 import { formatCurrencyPrecise, formatDateTime, toDatetimeLocal } from "@/lib/format";
 import type { VenueEvent } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";

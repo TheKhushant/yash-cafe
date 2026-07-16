@@ -46,6 +46,9 @@ export interface MenuItem {
   outOfStock: boolean;
   enabled: boolean;
   description?: string;
+  image?: string;
+  isFavourite?: boolean;
+  isMostOrdered?: boolean;
   venueId: string;
 }
 

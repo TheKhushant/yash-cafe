@@ -1,24 +1,12 @@
+import type { MenuItem } from "@/types";
 import { apiClient, delay, USE_MOCKS } from "../client";
 import { db, DEMO_VENUE_ID, uid } from "../mock-data";
 
-export interface MenuItem {
-  id: string;
-  venueId: string;
+export type { MenuItem };
 
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-
-  enabled: boolean;
-  outOfStock: boolean;
-
-  image?: string;
-
-  isFavourite?: boolean;
-
-  isMostOrdered?: boolean;
-}
+export type MenuInput = Omit<MenuItem, "id" | "venueId" | "outOfStock"> & {
+  outOfStock?: boolean;
+};
 
 function scoped(venueId: string | null): MenuItem[] {
   const all = db().menu;

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { DEMO_LOGINS } from "@/lib/api/services/auth.service";
+import { DEMO_LOGINS } from "@/lib/api/services/auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 export default function LoginPage() {

@@ -25,7 +25,7 @@ import { KpiSkeleton } from "@/components/shared/Skeletons";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashboardService } from "@/lib/api/services/dashboard.service";
+import { dashboardService } from "@/lib/api/services/dashboard";
 import { analyticsService } from "@/lib/api/services/service";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useAuthStore } from "@/stores/auth-store";

@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { usersService } from "@/lib/api/services/users.service"; // Platform-level users
+import { usersService } from "@/lib/api/services/users"; // Platform-level users
 import { formatDate } from "@/lib/format";
 import type { PlatformUser } from "@/types";
 

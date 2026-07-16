@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { usersService } from "@/lib/api/services/users.service";
+import { usersService } from "@/lib/api/services/users";
 import { formatCurrencyPrecise, formatDate } from "@/lib/format";
 import type { PlatformUser } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";

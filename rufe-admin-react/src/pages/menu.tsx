@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { menuService, type MenuInput } from "@/lib/api/services/menu.service";
+import { menuService, type MenuInput } from "@/lib/api/services/menu";
 import { formatCurrencyPrecise } from "@/lib/format";
 import type { MenuItem } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
@@ -66,7 +66,18 @@ export default function MenuPage() {
   function openCreate() { setEditing(null); setForm(EMPTY); setOpen(true); }
   function openEdit(m: MenuItem) {
     setEditing(m);
-    setForm({ name: m.name, category: m.category, price: m.price, stock: m.stock, enabled: m.enabled, description: m.description, outOfStock: m.outOfStock });
+    setForm({
+      name: m.name,
+      category: m.category,
+      price: m.price,
+      stock: m.stock,
+      enabled: m.enabled,
+      description: m.description,
+      outOfStock: m.outOfStock,
+      image: m.image,
+      isFavourite: m.isFavourite,
+      isMostOrdered: m.isMostOrdered,
+    });
     setOpen(true);
   }
 

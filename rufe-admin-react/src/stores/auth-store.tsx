@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { AuthUser } from "@/types";
-import { authService } from "@/lib/api/services/auth.service";
+import { authService } from "@/lib/api/services/auth";
 import {
   clearStoredToken,
   getStoredToken,
