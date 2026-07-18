@@ -1,6 +1,8 @@
 import type {
   AppNotification,
   Booking,
+  AssignedOffer,
+  AssignedOfferStatus,
   Game,
   MenuItem,
   Offer,
@@ -10,7 +12,6 @@ import type {
   Venue,
   VenueEvent,
 } from "@/types";
-
 
 
 export const DEMO_VENUE_ID = "venue-1";
@@ -92,6 +93,33 @@ export interface MockDb {
   platformUsers: PlatformUser[];
 }
 
+const userOfferCatalog: { name: string; type: string; code?: string }[] = [
+  { name: "Free Dessert", type: "Dessert", code: "DESSERT100" },
+  { name: "20% OFF", type: "Coupon", code: "SAVE20" },
+  { name: "Free Drink", type: "Drinks" },
+  { name: "Buy 1 Get 1 Burger", type: "Combo", code: "BOGOBURGER" },
+  { name: "Flat $10 Off", type: "Flat Discount", code: "FLAT10" },
+];
+
+const assignedOfferStatuses: AssignedOfferStatus[] = ["Active", "Redeemed", "Expired", "Cancelled"];
+
+function buildAssignedOffers(i: number): AssignedOffer[] {
+  const count = i % 5; // yields a mix of 0, 1, 2, 3, 4 offers per user
+  return Array.from({ length: count }).map((_, j) => {
+    const item = userOfferCatalog[(i + j) % userOfferCatalog.length];
+    const assignedDaysAgo = i + j * 3 + 1;
+    return {
+      id: `uoff-${i}-${j}`,
+      name: item.name,
+      type: item.type,
+      code: item.code,
+      assignedAt: daysFromNow(-assignedDaysAgo, 10 + (j % 8)),
+      expiresAt: daysFromNow(-assignedDaysAgo + 3, 10 + (j % 8)),
+      status: assignedOfferStatuses[(i + j) % assignedOfferStatuses.length],
+    };
+  });
+}
+
 function seed(): MockDb {
   const menu: MenuItem[] = menuCatalog.map(([n, category, price], i) => ({
     id: `menu-${i + 1}`,
@@ -170,6 +198,7 @@ function seed(): MockDb {
     role: "user",
     totalOrders: (i * 5) % 22,
     venueId: i % 3 === 0 ? "venue-2" : DEMO_VENUE_ID,
+    assignedOffers: buildAssignedOffers(i),
   }));
 
   const platformUsers: PlatformUser[] = [

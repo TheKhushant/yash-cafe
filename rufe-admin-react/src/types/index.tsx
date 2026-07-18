@@ -1,4 +1,6 @@
 export type Role = "user" | "admin" | "super_admin";
+export type AssignedOfferStatus = "Active" | "Redeemed" | "Expired" | "Cancelled";
+
 
 export interface AuthUser {
   id: string;
@@ -247,4 +249,28 @@ export interface Venue {
 export interface Paginated<T> {
   rows: T[];
   total: number;
+}
+
+export interface AssignedOffer {
+  id: string;
+  name: string;
+  type: string;
+  code?: string;
+  assignedAt: string;
+  expiresAt: string;
+  status: AssignedOfferStatus;
+}
+
+export interface PlatformUser {
+  id: string;
+  name: string;
+  email: string;
+  status: UserStatus;
+  joinedAt: string;
+  totalBookings: number;
+  totalOrders: number;
+  venueId: string | null;
+  role: "user" | "admin" | "super_admin";
+  /** Offers assigned to this user. Optional/absent for platform admin accounts. */
+  assignedOffers?: AssignedOffer[];
 }

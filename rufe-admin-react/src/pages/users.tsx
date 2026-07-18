@@ -6,14 +6,48 @@ import { DataTable, type Column } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TableSkeleton } from "@/components/shared/Skeletons";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import { usersService } from "@/lib/api/services/users";
-import { formatCurrencyPrecise, formatDate } from "@/lib/format";
-import type { PlatformUser } from "@/types";
+import { formatCurrencyPrecise, formatDate, formatDateTime } from "@/lib/format";
+import type { AssignedOffer, AssignedOfferStatus, PlatformUser } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
+
+const ASSIGNED_OFFER_TONE: Record<AssignedOfferStatus, "success" | "info" | "neutral" | "danger"> = {
+  Active: "success",
+  Redeemed: "info",
+  Expired: "neutral",
+  Cancelled: "danger",
+};
+
+function AssignedOfferCard({ offer }: { offer: AssignedOffer }) {
+  return (
+    <div className="space-y-2 text-sm">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-medium text-foreground">{offer.name}</span>
+        <StatusBadge status={offer.status} tone={ASSIGNED_OFFER_TONE[offer.status]} />
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {offer.type}
+        {offer.code ? ` • Code: ${offer.code}` : ""}
+      </p>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <p className="text-muted-foreground">Assigned</p>
+          <p className="font-medium text-foreground">{formatDateTime(offer.assignedAt)}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Expires</p>
+          <p className="font-medium text-foreground">{formatDateTime(offer.expiresAt)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function UsersPage() {
   const scope = useAuthStore((s) => s.venueScope)();
@@ -43,6 +77,43 @@ export default function UsersPage() {
     { key: "totalBookings", header: "Bookings", sortValue: (u) => u.totalBookings },
     { key: "joinedAt", header: "Joined", render: (u) => formatDate(u.joinedAt), sortValue: (u) => u.joinedAt },
     { key: "status", header: "Status", render: (u) => <StatusBadge status={u.status} /> },
+    {
+      key: "offers",
+      header: "Offers",
+      render: (u) => {
+        const assigned = u.assignedOffers ?? [];
+        if (assigned.length === 0) {
+          return <span className="text-sm text-muted-foreground">No Offers</span>;
+        }
+        const shown = assigned.slice(0, 2);
+        const extra = assigned.length - shown.length;
+        return (
+          <div className="flex flex-wrap items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {shown.map((o) => (
+              <Popover key={o.id}>
+                <PopoverTrigger asChild>
+                  <button type="button">
+                    <Badge variant="secondary" className="cursor-pointer font-normal">
+                      {o.name}
+                    </Badge>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-72">
+                  <AssignedOfferCard offer={o} />
+                </PopoverContent>
+              </Popover>
+            ))}
+            {extra > 0 && (
+              <button type="button" onClick={() => setActive(u)}>
+                <Badge variant="outline" className="cursor-pointer font-normal">
+                  +{extra} More
+                </Badge>
+              </button>
+            )}
+          </div>
+        );
+      },
+    },
   ];
 
   return (
@@ -97,6 +168,23 @@ export default function UsersPage() {
                         <span className="font-medium">{formatCurrencyPrecise(o.total)}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="mb-2 text-sm font-semibold">Assigned offers</h4>
+                  <div className="space-y-2">
+                    {(active.assignedOffers ?? []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        No offers have been assigned to this customer.
+                      </p>
+                    ) : (
+                      active.assignedOffers!.map((o) => (
+                        <div key={o.id} className="rounded-lg border px-3 py-2.5">
+                          <AssignedOfferCard offer={o} />
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>

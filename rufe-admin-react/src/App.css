@@ -61,6 +61,15 @@
 }
 
 :root {
+  --foreground: 222.2 47.4% 11.2%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+}
+.dark {
+  --foreground: 210 40% 98%;
+  --muted-foreground: 215 20.2% 65.1%;
+}
+
+:root {
   --radius: 0.875rem;
 
   --background: oklch(0.985 0.002 247);
