@@ -3,6 +3,7 @@ import type {
   Booking,
   Game,
   MenuItem,
+  Offer,
   Order,
   PlatformUser,
   ScanLogEntry,
@@ -10,7 +11,23 @@ import type {
   VenueEvent,
 } from "@/types";
 
+
+
 export const DEMO_VENUE_ID = "venue-1";
+
+export interface MockDb {
+  orders: Order[];
+  menu: MenuItem[];
+  events: VenueEvent[];
+  games: Game[];
+  users: PlatformUser[];
+  bookings: Booking[];
+  notifications: AppNotification[];
+  scanLogs: ScanLogEntry[];
+  venues: Venue[];
+  platformUsers: PlatformUser[];
+  offers: Offer[];
+}
 
 function daysFromNow(days: number, hour = 19): string {
   const d = new Date();
@@ -252,7 +269,144 @@ function seed(): MockDb {
     { id: "venue-5", name: "Fast Break Lounge", city: "Seattle", owner: "Tom Becker", status: "Active", revenue: 76900, createdAt: daysFromNow(-90, 10) },
   ];
 
-  return { orders, menu, events, games, users, bookings, notifications, scanLogs: [], platformUsers, venues };
+  const offers: Offer[] = [
+    {
+      id: "off-1",
+      name: "Welcome Flat 10 Off",
+      code: "WELCOME10",
+      description: "Flat discount for first-time diners.",
+      type: "Flat Discount",
+      discountValue: 10,
+      activationType: "Immediate",
+      startDate: daysFromNow(-20, 0),
+      endDate: daysFromNow(40, 23),
+      expiryDurationMinutes: 1440,
+      maxAssignments: 500,
+      perCustomerLimit: 1,
+      maxRedemptions: 500,
+      enabled: true,
+      assignedCount: 214,
+      redeemedCount: 158,
+      createdAt: daysFromNow(-20, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+    {
+      id: "off-2",
+      name: "Match Day 20% Off",
+      description: "Percentage discount during live match hours.",
+      type: "Percentage Discount",
+      discountValue: 20,
+      activationType: "OnQrScan",
+      startDate: daysFromNow(-10, 0),
+      endDate: daysFromNow(30, 23),
+      expiryDurationMinutes: 180,
+      maxAssignments: 300,
+      perCustomerLimit: 2,
+      maxRedemptions: 300,
+      enabled: true,
+      assignedCount: 132,
+      redeemedCount: 91,
+      createdAt: daysFromNow(-10, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+    {
+      id: "off-3",
+      name: "Free Loaded Nachos",
+      description: "Complimentary starter with any main course.",
+      type: "Free Item",
+      freeItemName: "Loaded Nachos",
+      activationType: "Manual",
+      startDate: daysFromNow(-5, 0),
+      endDate: daysFromNow(25, 23),
+      expiryDurationMinutes: 60,
+      maxAssignments: 150,
+      perCustomerLimit: 1,
+      maxRedemptions: 150,
+      enabled: true,
+      assignedCount: 58,
+      redeemedCount: 40,
+      createdAt: daysFromNow(-5, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+    {
+      id: "off-4",
+      name: "Weekend Combo Deal",
+      description: "Discounted combo for weekend groups.",
+      type: "Combo",
+      benefitDetails: "2 Burgers + 2 Draft Lagers + Loaded Nachos at a fixed price.",
+      activationType: "Immediate",
+      startDate: daysFromNow(-15, 0),
+      endDate: daysFromNow(-1, 23),
+      expiryDurationMinutes: 720,
+      maxAssignments: 200,
+      perCustomerLimit: 1,
+      maxRedemptions: 200,
+      enabled: true,
+      assignedCount: 176,
+      redeemedCount: 140,
+      createdAt: daysFromNow(-15, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+    {
+      id: "off-5",
+      name: "BOGO Cocktails",
+      description: "Buy one cocktail, get one free.",
+      type: "Buy One Get One",
+      benefitDetails: "Applies to house cocktails only.",
+      activationType: "OnQrScan",
+      startDate: daysFromNow(-2, 0),
+      endDate: daysFromNow(15, 23),
+      expiryDurationMinutes: 120,
+      maxAssignments: 250,
+      perCustomerLimit: 2,
+      maxRedemptions: 250,
+      enabled: false,
+      assignedCount: 34,
+      redeemedCount: 12,
+      createdAt: daysFromNow(-2, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+    {
+      id: "off-6",
+      name: "Loyalty Cashback",
+      description: "Cashback credited to wallet on orders above $40.",
+      type: "Cashback",
+      discountValue: 5,
+      activationType: "Manual",
+      startDate: daysFromNow(-30, 0),
+      endDate: daysFromNow(60, 23),
+      expiryDurationMinutes: 4320,
+      maxAssignments: null,
+      perCustomerLimit: 1,
+      maxRedemptions: null,
+      enabled: true,
+      assignedCount: 302,
+      redeemedCount: 245,
+      createdAt: daysFromNow(-30, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+    {
+      id: "off-7",
+      name: "Birthday Dessert on Us",
+      description: "Free dessert for birthday bookings.",
+      type: "Dessert",
+      benefitDetails: "One complimentary Chocolate Brownie per birthday booking.",
+      activationType: "Immediate",
+      startDate: daysFromNow(-45, 0),
+      endDate: daysFromNow(-10, 23),
+      expiryDurationMinutes: 1440,
+      maxAssignments: 80,
+      perCustomerLimit: 1,
+      maxRedemptions: 80,
+      enabled: true,
+      assignedCount: 67,
+      redeemedCount: 61,
+      createdAt: daysFromNow(-45, 9),
+      venueId: DEMO_VENUE_ID,
+    },
+  ];
+
+  return { orders, menu, events, games, users, bookings, notifications, scanLogs: [], platformUsers, venues, offers };
 }
 
 // Mock Database

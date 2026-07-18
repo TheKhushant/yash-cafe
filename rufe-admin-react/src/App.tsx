@@ -20,6 +20,7 @@ import SettingsPage from "@/pages/settings";
 import SystemSettingsPage from "@/pages/system-settings";
 import UsersPage from "@/pages/users";
 // import IndexPage from "@/pages/index";
+import OffersPage from "./pages/offers";
 
 import { AppShell } from "./components/layout/AppShell";
 import { useAuthStore } from "./stores/auth-store";
@@ -91,7 +92,7 @@ export default function App() {
             <Route path="platform-revenue" element={<PlatformRevenuePage />} />
             <Route path="platform-analytics" element={<PlatformAnalyticsPage />} />
             <Route path="system-settings" element={<SystemSettingsPage />} />
-
+            <Route path="/offers" element={<OffersPage />} />
             {/* Catch all */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>

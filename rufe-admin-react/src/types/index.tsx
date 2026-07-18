@@ -52,6 +52,50 @@ export interface MenuItem {
   venueId: string;
 }
 
+export type OfferType =
+  | "Coupon Code"
+  | "Starter"
+  | "Main Course"
+  | "Dessert"
+  | "Drinks"
+  | "Combo"
+  | "Flat Discount"
+  | "Percentage Discount"
+  | "Buy One Get One"
+  | "Free Item"
+  | "Cashback"
+  | "Custom";
+
+export type OfferActivationType = "Immediate" | "OnQrScan" | "Manual";
+
+export type OfferStatus = "Active" | "Disabled" | "Expired";
+
+export interface Offer {
+  id: string;
+  name: string;
+  code?: string;
+  description?: string;
+  type: OfferType;
+  /** Used for Flat Discount (amount), Percentage Discount (%), Cashback (amount) */
+  discountValue?: number;
+  /** Used for Free Item */
+  freeItemName?: string;
+  /** Used for Combo, Buy One Get One and category types (Starter/Main Course/Dessert/Drinks/Custom) */
+  benefitDetails?: string;
+  activationType: OfferActivationType;
+  startDate: string;
+  endDate: string;
+  expiryDurationMinutes: number;
+  maxAssignments: number | null;
+  perCustomerLimit: number | null;
+  maxRedemptions: number | null;
+  enabled: boolean;
+  assignedCount: number;
+  redeemedCount: number;
+  createdAt: string;
+  venueId: string;
+}
+
 export type EventStatus = "Draft" | "Published";
 
 export interface VenueEvent {

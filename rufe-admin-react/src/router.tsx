@@ -11,7 +11,6 @@ import EventsPage from "@/pages/events";
 import GamesPage from "@/pages/games";
 import LoginPage from "@/pages/login";
 import MenuPage from "@/pages/menu";
-import NotificationsPage from "@/pages/notifications";
 import OrdersPage from "@/pages/orders";
 import PlatformAnalyticsPage from "@/pages/platform-analytics";
 import PlatformRevenuePage from "@/pages/platform-revenue";
@@ -21,6 +20,8 @@ import SettingsPage from "@/pages/settings";
 import SystemSettingsPage from "@/pages/system-settings";
 import UsersPage from "@/pages/users";
 import { useAuthStore } from "@/stores/auth-store";
+import NotificationsPage from "@/pages/notifications";
+import OffersPage from "@/pages/offers";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +83,8 @@ export function AppRouter() {
               <Route path="/platform-revenue" element={<PlatformRevenuePage />} />
               <Route path="/platform-analytics" element={<PlatformAnalyticsPage />} />
               <Route path="/system-settings" element={<SystemSettingsPage />} />
+              <Route path="/offers" element={<OffersPage />} />
+
             </Route>
           </Route>
 

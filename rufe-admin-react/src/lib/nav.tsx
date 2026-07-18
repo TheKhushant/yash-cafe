@@ -14,7 +14,9 @@ import {
   UsersRound,
   UtensilsCrossed,
   Wallet,
+  Tag,
 } from "lucide-react";
+
 
 import type { Role } from "@/types";
 
@@ -42,6 +44,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Menu & Inventory", to: "/menu", icon: UtensilsCrossed, roles: ALL },
       { label: "Events", to: "/events", icon: CalendarDays, roles: ALL },
       { label: "Games", to: "/games", icon: Gamepad2, roles: ALL },
+      { label: "Offers", to: "/offers", icon: Tag, roles: ALL },
       { label: "Users", to: "/users", icon: UsersRound, roles: ALL },
       { label: "QR Scanner", to: "/scanner", icon: QrCode, roles: ALL },
       { label: "Notifications", to: "/notifications", icon: Bell, roles: ALL },
