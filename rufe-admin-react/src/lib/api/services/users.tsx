@@ -1,4 +1,4 @@
-import type { Booking, Order, PlatformUser } from "@/types";
+import type { Booking, DietaryPreferences, Order, PlatformUser } from "@/types";
 import { apiClient, delay, USE_MOCKS } from "../client";
 import { db, uid } from "../mock-data";
 
@@ -30,6 +30,17 @@ export const usersService = {
       return delay({ ...user }, 200);
     }
     const { data } = await apiClient.patch<PlatformUser>(`/users/${id}/status`, { status });
+    return data;
+  },
+
+  async updateDietaryPreferences(id: string, prefs: DietaryPreferences): Promise<PlatformUser> {
+    if (USE_MOCKS) {
+      const user = db().users.find((u) => u.id === id);
+      if (!user) throw new Error("User not found");
+      user.dietaryPreferences = prefs;
+      return delay({ ...user }, 200);
+    }
+    const { data } = await apiClient.patch<PlatformUser>(`/users/${id}/dietary-preferences`, prefs);
     return data;
   },
 

@@ -292,6 +292,58 @@ export interface AssignedOfferQrPayload {
   token: string;
 }
 
+export type FoodPreference = "Veg" | "Non Veg" | "Vegan" | "Jain" | "Eggitarian" | "Pescatarian";
+
+export type MedicalRestriction =
+  | "Diabetic" | "Low Sodium" | "Low Sugar" | "Low Fat"
+  | "Heart Patient" | "Kidney Friendly" | "Pregnancy Safe";
+
+export interface DietaryPreferences {
+  foodPreference?: FoodPreference;
+  allergies: Allergen[];
+  dislikedIngredients: string[];
+  medicalRestrictions: MedicalRestriction[];
+  favoriteCategories: string[];
+}
+
+export interface PlatformUser {
+  id: string;
+  name: string;
+  email: string;
+  status: UserStatus;
+  joinedAt: string;
+  totalBookings: number;
+  totalOrders: number;
+  venueId: string | null;
+  role: "user" | "admin" | "super_admin";
+  /** Offers assigned to this user. Optional/absent for platform admin accounts. */
+  assignedOffers?: AssignedOffer[];
+  /** Absent for platform admin accounts; customers may not have set preferences yet either. */
+  dietaryPreferences?: DietaryPreferences;
+}
+
+/* ------------------------------------------------------------------ */
+/* Smart Matching Engine                                               */
+/* ------------------------------------------------------------------ */
+
+export type CompatibilityLevel = "Perfect Match" | "Recommended" | "Use Caution" | "Not Recommended" | "Unsafe";
+
+/** Drives the colored warning card shown to a customer (Green/Yellow/Orange/Red). */
+export type CompatibilityCardTone = "green" | "yellow" | "orange" | "red";
+
+export interface CompatibilityResult {
+  score: number;
+  level: CompatibilityLevel;
+  cardTone: CompatibilityCardTone;
+  headline: string;
+  details: string[];
+  foodPreferenceMismatch: boolean;
+  allergensDetected: Allergen[];
+  dislikedIngredientsDetected: string[];
+  medicalWarnings: string[];
+  favoriteCategoryMatch: boolean;
+}
+
 export interface PlatformUser {
   id: string;
   name: string;
@@ -481,3 +533,59 @@ export interface QuizReportSummary {
   participationSeries: { label: string; players: number }[];
   accuracySeries: { label: string; accuracy: number }[];
 }
+
+/* ------------------------------------------------------------------ */
+/* Dietary & Allergy System — shared vocabulary                        */
+/* ------------------------------------------------------------------ */
+
+export type FoodType = "Veg" | "Non Veg" | "Vegan" | "Jain" | "Egg" | "Seafood";
+
+export type Allergen =
+  | "Milk" | "Egg" | "Peanuts" | "Tree Nuts" | "Soy" | "Fish" | "Shellfish"
+  | "Wheat" | "Gluten" | "Sesame" | "Mustard" | "Celery" | "Lupin" | "Sulphites";
+
+export type DietaryTag =
+  | "High Protein" | "Low Carb" | "Gluten Free" | "Dairy Free" | "Nut Free"
+  | "Sugar Free" | "Keto" | "Healthy" | "Kids Friendly" | "Chef Special"
+  | "Seasonal" | "Popular";
+
+export type SpiceLevel = "No Spice" | "Mild" | "Medium" | "Hot" | "Extra Hot";
+
+export type ServingSize = "1 Person" | "2 Persons" | "4 Persons";
+
+export interface NutritionInfo {
+  calories?: number;
+  protein?: number;
+  fat?: number;
+  carbohydrates?: number;
+  sugar?: number;
+  sodium?: number;
+}
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  outOfStock: boolean;
+  enabled: boolean;
+  description?: string;
+  image?: string;
+  isFavourite?: boolean;
+  isMostOrdered?: boolean;
+  venueId: string;
+  /** Can be multiple, e.g. a dish tagged both "Non Veg" and "Egg". */
+  foodType: FoodType[];
+  ingredients: string[];
+  allergens: Allergen[];
+  dietaryTags: DietaryTag[];
+  nutrition?: NutritionInfo;
+  containsAlcohol: boolean;
+  spiceLevel: SpiceLevel;
+  /** Minutes. */
+  preparationTime: number;
+  servingSize: ServingSize;
+  chefNotes?: string;
+}
+

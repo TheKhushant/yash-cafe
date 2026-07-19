@@ -23,6 +23,15 @@ import type {
   QuizSettings, 
   QuizStatus, 
   Reward,
+  Allergen,
+  DietaryPreferences,
+  DietaryTag,
+  FoodPreference,
+  FoodType,
+  MedicalRestriction,
+  NutritionInfo,
+  ServingSize,
+  SpiceLevel,
 } from "@/types";
 
 
@@ -80,6 +89,113 @@ function pick<T>(arr: T[], i: number): T {
 function name(i: number): string {
   return `${pick(firstNames, i)} ${pick(lastNames, i * 3 + 1)}`;
 }
+
+/** Hand-authored per-item dietary data, parallel to menuCatalog above (index-matched). */
+const menuDietaryCatalog: Array<{
+  foodType: FoodType[];
+  ingredients: string[];
+  allergens: Allergen[];
+  dietaryTags: DietaryTag[];
+  nutrition: NutritionInfo;
+  containsAlcohol: boolean;
+  spiceLevel: SpiceLevel;
+  preparationTime: number;
+  servingSize: ServingSize;
+  chefNotes?: string;
+}> = [
+  { // Classic Burger
+    foodType: ["Non Veg"], ingredients: ["Beef", "Cheese", "Bun", "Lettuce", "Tomato", "Onion", "Mayo"],
+    allergens: ["Milk", "Wheat", "Gluten", "Egg"], dietaryTags: ["Popular"],
+    nutrition: { calories: 720, protein: 38, fat: 40, carbohydrates: 45, sugar: 8, sodium: 980 },
+    containsAlcohol: false, spiceLevel: "Mild", preparationTime: 15, servingSize: "1 Person",
+  },
+  { // BBQ Wings
+    foodType: ["Non Veg"], ingredients: ["Chicken", "BBQ Sauce", "Garlic", "Honey", "Butter"],
+    allergens: ["Soy"], dietaryTags: ["High Protein", "Popular"],
+    nutrition: { calories: 640, protein: 42, fat: 38, carbohydrates: 22, sugar: 14, sodium: 1100 },
+    containsAlcohol: false, spiceLevel: "Medium", preparationTime: 20, servingSize: "2 Persons",
+  },
+  { // Loaded Nachos
+    foodType: ["Veg"], ingredients: ["Corn Chips", "Cheese", "Jalapeno", "Sour Cream", "Tomato", "Onion"],
+    allergens: ["Milk"], dietaryTags: ["Kids Friendly"],
+    nutrition: { calories: 810, protein: 18, fat: 46, carbohydrates: 70, sugar: 6, sodium: 1250 },
+    containsAlcohol: false, spiceLevel: "Mild", preparationTime: 12, servingSize: "2 Persons",
+  },
+  { // Margherita Pizza
+    foodType: ["Veg"], ingredients: ["Cheese", "Tomato", "Basil", "Wheat Dough", "Olive Oil"],
+    allergens: ["Milk", "Wheat", "Gluten"], dietaryTags: ["Chef Special", "Popular"],
+    nutrition: { calories: 850, protein: 32, fat: 30, carbohydrates: 105, sugar: 9, sodium: 1400 },
+    containsAlcohol: false, spiceLevel: "No Spice", preparationTime: 18, servingSize: "2 Persons",
+    chefNotes: "Wood-fired, best served fresh out of the oven.",
+  },
+  { // Crispy Calamari
+    foodType: ["Seafood"], ingredients: ["Squid", "Flour", "Egg", "Lemon", "Garlic Aioli"],
+    allergens: ["Shellfish", "Wheat", "Gluten", "Egg"], dietaryTags: [],
+    nutrition: { calories: 480, protein: 24, fat: 26, carbohydrates: 34, sugar: 2, sodium: 760 },
+    containsAlcohol: false, spiceLevel: "Mild", preparationTime: 15, servingSize: "1 Person",
+  },
+  { // Pulled Pork Sliders
+    foodType: ["Non Veg"], ingredients: ["Pork", "BBQ Sauce", "Bun", "Coleslaw", "Butter"],
+    allergens: ["Wheat", "Gluten", "Milk"], dietaryTags: ["Popular"],
+    nutrition: { calories: 690, protein: 34, fat: 32, carbohydrates: 58, sugar: 16, sodium: 1050 },
+    containsAlcohol: false, spiceLevel: "Mild", preparationTime: 16, servingSize: "2 Persons",
+  },
+  { // Caesar Salad
+    foodType: ["Non Veg", "Egg"], ingredients: ["Romaine Lettuce", "Chicken", "Parmesan", "Egg", "Anchovy", "Croutons"],
+    allergens: ["Milk", "Egg", "Fish", "Wheat", "Gluten"], dietaryTags: ["Healthy", "Low Carb"],
+    nutrition: { calories: 420, protein: 30, fat: 24, carbohydrates: 18, sugar: 3, sodium: 890 },
+    containsAlcohol: false, spiceLevel: "No Spice", preparationTime: 10, servingSize: "1 Person",
+  },
+  { // Truffle Fries
+    foodType: ["Vegan", "Jain"], ingredients: ["Potato", "Truffle Oil", "Parsley", "Salt"],
+    allergens: [], dietaryTags: ["Gluten Free", "Dairy Free", "Nut Free"],
+    nutrition: { calories: 480, protein: 6, fat: 26, carbohydrates: 56, sugar: 1, sodium: 620 },
+    containsAlcohol: false, spiceLevel: "No Spice", preparationTime: 10, servingSize: "1 Person",
+  },
+  { // Draft Lager
+    foodType: ["Vegan"], ingredients: ["Barley", "Hops", "Water", "Yeast"],
+    allergens: ["Gluten"], dietaryTags: [],
+    nutrition: { calories: 210, protein: 2, fat: 0, carbohydrates: 18, sugar: 0, sodium: 15 },
+    containsAlcohol: true, spiceLevel: "No Spice", preparationTime: 2, servingSize: "1 Person",
+  },
+  { // House IPA
+    foodType: ["Vegan"], ingredients: ["Barley", "Hops", "Water", "Yeast"],
+    allergens: ["Gluten"], dietaryTags: [],
+    nutrition: { calories: 240, protein: 2, fat: 0, carbohydrates: 20, sugar: 0, sodium: 15 },
+    containsAlcohol: true, spiceLevel: "No Spice", preparationTime: 2, servingSize: "1 Person",
+  },
+  { // Old Fashioned
+    foodType: ["Vegan"], ingredients: ["Bourbon", "Sugar", "Bitters", "Orange Peel"],
+    allergens: [], dietaryTags: [],
+    nutrition: { calories: 180, protein: 0, fat: 0, carbohydrates: 8, sugar: 7, sodium: 2 },
+    containsAlcohol: true, spiceLevel: "No Spice", preparationTime: 5, servingSize: "1 Person",
+  },
+  { // Margarita
+    foodType: ["Vegan"], ingredients: ["Tequila", "Lime", "Triple Sec", "Salt"],
+    allergens: [], dietaryTags: [],
+    nutrition: { calories: 200, protein: 0, fat: 0, carbohydrates: 12, sugar: 10, sodium: 40 },
+    containsAlcohol: true, spiceLevel: "No Spice", preparationTime: 5, servingSize: "1 Person",
+  },
+  { // Soft Drink
+    foodType: ["Vegan", "Jain"], ingredients: ["Carbonated Water", "Sugar", "Caramel Colour"],
+    allergens: [], dietaryTags: ["Kids Friendly"],
+    nutrition: { calories: 140, protein: 0, fat: 0, carbohydrates: 39, sugar: 39, sodium: 20 },
+    containsAlcohol: false, spiceLevel: "No Spice", preparationTime: 1, servingSize: "1 Person",
+  },
+  { // Chocolate Brownie
+    foodType: ["Veg", "Egg"], ingredients: ["Chocolate", "Butter", "Egg", "Flour", "Sugar", "Almond"],
+    allergens: ["Milk", "Egg", "Wheat", "Gluten", "Tree Nuts"], dietaryTags: ["Kids Friendly", "Chef Special"],
+    nutrition: { calories: 520, protein: 7, fat: 28, carbohydrates: 62, sugar: 44, sodium: 210 },
+    containsAlcohol: false, spiceLevel: "No Spice", preparationTime: 8, servingSize: "1 Person",
+    chefNotes: "Served warm with a scoop of vanilla ice cream on request.",
+  },
+  { // Buffalo Cauliflower
+    foodType: ["Vegan"], ingredients: ["Cauliflower", "Hot Sauce", "Flour", "Celery"],
+    allergens: ["Wheat", "Gluten", "Celery"], dietaryTags: ["Healthy", "Dairy Free"],
+    nutrition: { calories: 360, protein: 8, fat: 16, carbohydrates: 42, sugar: 5, sodium: 780 },
+    containsAlcohol: false, spiceLevel: "Hot", preparationTime: 14, servingSize: "1 Person",
+  },
+];
 
 const menuCatalog: Array<[string, string, number]> = [
   ["Classic Burger", "Mains", 14],
@@ -407,6 +523,7 @@ function seed(): MockDb {
     enabled: i !== 11,
     description: `Freshly prepared ${n.toLowerCase()}.`,
     venueId: DEMO_VENUE_ID,
+    ...menuDietaryCatalog[i],
   }));
 
   const events: VenueEvent[] = [
@@ -464,6 +581,28 @@ function seed(): MockDb {
     { id: "game-5", title: "Yankees vs Red Sox", league: "MLB", schedule: daysFromNow(4, 18), enabled: true, venueId: DEMO_VENUE_ID },
   ];
 
+  const FOOD_PREFERENCES: FoodPreference[] = ["Veg", "Non Veg", "Vegan", "Jain", "Eggitarian", "Pescatarian"];
+  const ALL_ALLERGENS: Allergen[] = [
+    "Milk", "Egg", "Peanuts", "Tree Nuts", "Soy", "Fish", "Shellfish",
+    "Wheat", "Gluten", "Sesame", "Mustard", "Celery", "Lupin", "Sulphites",
+  ];
+  const DISLIKE_POOL = ["Onion", "Garlic", "Mushroom", "Olives", "Broccoli", "Capsicum", "Spinach"];
+  const MEDICAL_POOL: MedicalRestriction[] = [
+    "Diabetic", "Low Sodium", "Low Sugar", "Low Fat", "Heart Patient", "Kidney Friendly", "Pregnancy Safe",
+  ];
+  const FAVORITE_CATEGORY_POOL = ["Mains", "Starters", "Desserts", "Drinks", "Salads", "Cocktails"];
+
+  function buildDietaryPreferences(i: number): DietaryPreferences | undefined {
+    if (i % 5 === 0) return undefined; // simulate customers who haven't set preferences yet
+    return {
+      foodPreference: pick(FOOD_PREFERENCES, i),
+      allergies: Array.from({ length: i % 3 }).map((_, j) => pick(ALL_ALLERGENS, i + j * 5)),
+      dislikedIngredients: Array.from({ length: i % 3 }).map((_, j) => pick(DISLIKE_POOL, i + j * 2)),
+      medicalRestrictions: i % 4 === 0 ? [pick(MEDICAL_POOL, i)] : [],
+      favoriteCategories: Array.from({ length: 1 + (i % 2) }).map((_, j) => pick(FAVORITE_CATEGORY_POOL, i + j * 3)),
+    };
+  }
+
   const users: PlatformUser[] = Array.from({ length: 38 }).map((_, i) => ({
     id: `usr-${i + 1}`,
     name: name(i),
@@ -474,6 +613,7 @@ function seed(): MockDb {
     role: "user",
     totalOrders: (i * 5) % 22,
     venueId: i % 3 === 0 ? "venue-2" : DEMO_VENUE_ID,
+    dietaryPreferences: buildDietaryPreferences(i),
   }));
 
   const platformUsers: PlatformUser[] = [

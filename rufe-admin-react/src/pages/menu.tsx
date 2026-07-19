@@ -1,6 +1,6 @@
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Pencil, Plus, Trash2, Heart } from "lucide-react";
+import { Pencil, Plus, Trash2, Heart, Sparkles } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -9,10 +9,14 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { TableSkeleton } from "@/components/shared/Skeletons";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { MenuItemBadges } from "@/components/dietary/MenuItemBadges";
+import { MenuItemDietaryFields } from "@/components/dietary/MenuItemDietaryFields";
+import { RecommendDishDialog } from "@/components/dietary/RecommendDishDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -21,12 +25,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { menuService, type MenuInput } from "@/lib/api/services/menu";
+import { usersService } from "@/lib/api/services/users";
+import { computeCompatibility } from "@/lib/dietary";
 import { formatCurrencyPrecise } from "@/lib/format";
-import type { MenuItem } from "@/types";
+import type { DietaryTag, FoodType, MenuItem } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
+
+const FOOD_TYPES: FoodType[] = ["Veg", "Non Veg", "Vegan", "Jain", "Egg", "Seafood"];
+const DIETARY_TAGS: DietaryTag[] = [
+  "High Protein", "Low Carb", "Gluten Free", "Dairy Free", "Nut Free", "Sugar Free",
+  "Keto", "Healthy", "Kids Friendly", "Chef Special", "Seasonal", "Popular",
+];
 
 const EMPTY: MenuInput = {
   name: "", category: "Mains", price: 0, stock: 0, enabled: true, description: "",
+  foodType: [], ingredients: [], allergens: [], dietaryTags: [],
+  containsAlcohol: false, spiceLevel: "No Spice", preparationTime: 15, servingSize: "1 Person",
 };
 
 export default function MenuPage() {
@@ -36,8 +50,17 @@ export default function MenuPage() {
   const [form, setForm] = useState<MenuInput>(EMPTY);
   const [open, setOpen] = useState(false);
   const [toDelete, setToDelete] = useState<MenuItem | null>(null);
+  const [recommending, setRecommending] = useState<MenuItem | null>(null);
+
+  const [foodTypeFilter, setFoodTypeFilter] = useState("all");
+  const [tagFilter, setTagFilter] = useState("all");
+  const [maxPrepTime, setMaxPrepTime] = useState("");
+  const [maxCalories, setMaxCalories] = useState("");
+  const [previewCustomerId, setPreviewCustomerId] = useState("");
 
   const items = useQuery({ queryKey: ["menu", scope], queryFn: () => menuService.list(scope) });
+  const users = useQuery({ queryKey: ["users", scope], queryFn: () => usersService.list(scope) });
+  const previewCustomer = (users.data ?? []).find((u) => u.id === previewCustomerId);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["menu"] });
@@ -78,15 +101,57 @@ export default function MenuPage() {
       image: m.image,
       isFavourite: m.isFavourite,
       isMostOrdered: m.isMostOrdered,
+      foodType: m.foodType,
+      ingredients: m.ingredients,
+      allergens: m.allergens,
+      dietaryTags: m.dietaryTags,
+      nutrition: m.nutrition,
+      containsAlcohol: m.containsAlcohol,
+      spiceLevel: m.spiceLevel,
+      preparationTime: m.preparationTime,
+      servingSize: m.servingSize,
+      chefNotes: m.chefNotes,
     });
     setOpen(true);
   }
+
+  const filtered = useMemo(() => {
+    const all = items.data ?? [];
+    return all.filter((m) => {
+      if (foodTypeFilter !== "all" && !m.foodType.includes(foodTypeFilter as FoodType)) return false;
+      if (tagFilter !== "all" && !m.dietaryTags.includes(tagFilter as DietaryTag)) return false;
+      if (maxPrepTime && m.preparationTime > Number(maxPrepTime)) return false;
+      if (maxCalories && (m.nutrition?.calories ?? 0) > Number(maxCalories)) return false;
+      return true;
+    });
+  }, [items.data, foodTypeFilter, tagFilter, maxPrepTime, maxCalories]);
 
   const columns: Column<MenuItem>[] = [
     { key: "name", header: "Item", render: (m) => <span className="font-medium text-foreground">{m.name}</span>, sortValue: (m) => m.name },
     { key: "category", header: "Category", sortValue: (m) => m.category },
     { key: "price", header: "Price", render: (m) => formatCurrencyPrecise(m.price), sortValue: (m) => m.price },
     { key: "stock", header: "Stock", render: (m) => <span className={m.stock <= 5 ? "text-warning-foreground" : ""}>{m.stock}</span>, sortValue: (m) => m.stock },
+    {
+      key: "tags",
+      header: "Dietary Info",
+      render: (m) => <MenuItemBadges item={m} compact />,
+    },
+    ...(previewCustomer ? [{
+      key: "compatibility",
+      header: "Compatibility",
+      render: (m: MenuItem) => {
+        const result = computeCompatibility(m, previewCustomer.dietaryPreferences);
+        return (
+          <span className={
+            result.cardTone === "green" ? "text-success font-medium" :
+            result.cardTone === "yellow" ? "text-warning-foreground font-medium" :
+            result.cardTone === "orange" ? "text-orange-600 font-medium" : "text-destructive font-medium"
+          }>
+            {result.score}% · {result.level}
+          </span>
+        );
+      },
+    } as Column<MenuItem>] : []),
     {
       key: "status", header: "Availability",
       render: (m) => (m.outOfStock ? <StatusBadge status="Out of Stock" tone="danger" /> : m.enabled ? <StatusBadge status="Available" tone="success" /> : <StatusBadge status="Disabled" tone="neutral" />),
@@ -96,6 +161,9 @@ export default function MenuPage() {
       render: (m) => (
         <div className="flex items-center justify-end gap-1">
           <Switch checked={!m.outOfStock} onCheckedChange={(v) => patch.mutate({ id: m.id, data: { outOfStock: !v } })} title="In stock" />
+          <Button variant="ghost" size="icon" className="size-8" onClick={() => setRecommending(m)} title="Recommend to customer">
+            <Sparkles className="size-4" />
+          </Button>
           <Button variant="ghost" size="icon" className="size-8" onClick={() => openEdit(m)}><Pencil className="size-4" /></Button>
           <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => setToDelete(m)}><Trash2 className="size-4" /></Button>
         </div>
@@ -107,18 +175,59 @@ export default function MenuPage() {
     <div className="space-y-6">
       <PageHeader
         title="Menu & Inventory"
-        description="Manage items, pricing and stock availability."
+        description="Manage items, pricing, stock, and dietary/allergen information."
         actions={<Button onClick={openCreate}><Plus className="size-4" />Add Item</Button>}
       />
 
       {items.isLoading ? (
         <TableSkeleton />
       ) : (
-        <DataTable data={items.data ?? []} columns={columns} rowKey={(m) => m.id} searchKeys={["name", "category"]} searchPlaceholder="Search menu…" />
+        <DataTable
+          data={filtered}
+          columns={columns}
+          rowKey={(m) => m.id}
+          searchKeys={["name", "category"]}
+          searchPlaceholder="Search menu…"
+          toolbar={
+            <>
+              <Select value={foodTypeFilter} onValueChange={setFoodTypeFilter}>
+                <SelectTrigger className="w-[140px]"><SelectValue placeholder="Diet" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Diets</SelectItem>
+                  {FOOD_TYPES.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Select value={tagFilter} onValueChange={setTagFilter}>
+                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Dietary Tag" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tags</SelectItem>
+                  {DIETARY_TAGS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Input
+                type="number" min={0} placeholder="Max prep (min)" value={maxPrepTime}
+                onChange={(e) => setMaxPrepTime(e.target.value)} className="w-[130px]"
+              />
+              <Input
+                type="number" min={0} placeholder="Max calories" value={maxCalories}
+                onChange={(e) => setMaxCalories(e.target.value)} className="w-[130px]"
+              />
+              <Select value={previewCustomerId || "__none"} onValueChange={(v) => setPreviewCustomerId(v === "__none" ? "" : v)}>
+                <SelectTrigger className="w-[200px]"><SelectValue placeholder="Preview as customer…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none">No preview</SelectItem>
+                  {(users.data ?? []).filter((u) => u.role === "user" && u.status === "Active").map((u) => (
+                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          }
+        />
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editing ? "Edit Item" : "Add Item"}
@@ -263,6 +372,11 @@ export default function MenuPage() {
               />
             </div>
 
+            {/* Food Classification, Ingredients, Allergens, Spice, Nutrition, Dietary Tags, Alcohol, Chef Notes */}
+            <div className="sm:col-span-2 border-t pt-4">
+              <MenuItemDietaryFields form={form} onChange={(p) => setForm({ ...form, ...p })} />
+            </div>
+
           </div>
 
           <DialogFooter>
@@ -292,6 +406,8 @@ export default function MenuPage() {
         confirmLabel="Delete"
         onConfirm={() => { if (toDelete) remove.mutate(toDelete.id); setToDelete(null); }}
       />
+
+      <RecommendDishDialog item={recommending} onOpenChange={(o) => !o && setRecommending(null)} />
     </div>
   );
 }

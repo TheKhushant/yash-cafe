@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MoreHorizontal, QrCode, Tag } from "lucide-react";
+import { MoreHorizontal, QrCode, Salad, Tag } from "lucide-react";
 
 import { AssignOfferDialog } from "@/components/shared/AssignOfferDialog";
 import { AssignedOfferQrDialog } from "@/components/shared/AssignedOfferQrDialog";
@@ -10,6 +10,7 @@ import { DataTable, type Column } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TableSkeleton } from "@/components/shared/Skeletons";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DietaryPreferencesForm } from "@/components/dietary/DietaryPreferencesForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,8 +26,12 @@ import {
 import { assignedOffersService } from "@/lib/api/services/assigned-offers";
 import { usersService } from "@/lib/api/services/users";
 import { formatCurrencyPrecise, formatDate, formatDateTime } from "@/lib/format";
-import type { AssignedOffer, AssignedOfferStatus, PlatformUser } from "@/types";
+import type { AssignedOffer, AssignedOfferStatus, DietaryPreferences, PlatformUser } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
+
+const EMPTY_DIETARY: DietaryPreferences = {
+  allergies: [], dislikedIngredients: [], medicalRestrictions: [], favoriteCategories: [],
+};
 
 const ASSIGNED_OFFER_TONE: Record<AssignedOfferStatus, "success" | "info" | "neutral" | "danger"> = {
   Assigned: "success",
@@ -120,6 +125,11 @@ export default function UsersPage() {
   const [assignOfferOpen, setAssignOfferOpen] = useState(false);
   const [qrOffer, setQrOffer] = useState<AssignedOffer | null>(null);
   const [cancelTarget, setCancelTarget] = useState<AssignedOffer | null>(null);
+  const [dietaryDraft, setDietaryDraft] = useState<DietaryPreferences>(EMPTY_DIETARY);
+
+  useEffect(() => {
+    setDietaryDraft(active?.dietaryPreferences ?? EMPTY_DIETARY);
+  }, [active?.id]);
 
   const users = useQuery({ queryKey: ["users", scope], queryFn: () => usersService.list(scope) });
   const history = useQuery({
@@ -134,6 +144,14 @@ export default function UsersPage() {
       qc.invalidateQueries({ queryKey: ["users"] });
       setActive((cur) => (cur ? { ...cur, status: u.status } : cur));
       toast.success(`${u.name} ${u.status === "Blocked" ? "blocked" : "unblocked"}`);
+    },
+  });
+
+  const saveDietary = useMutation({
+    mutationFn: (prefs: DietaryPreferences) => usersService.updateDietaryPreferences(active!.id, prefs),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Dietary preferences saved");
     },
   });
 
@@ -284,6 +302,25 @@ export default function UsersPage() {
                       ))
                     )}
                   </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h4 className="flex items-center gap-1.5 text-sm font-semibold">
+                      <Salad className="size-4" /> Dietary Preferences
+                    </h4>
+                    <Button
+                      size="sm"
+                      onClick={() => saveDietary.mutate(dietaryDraft)}
+                      disabled={saveDietary.isPending}
+                    >
+                      {saveDietary.isPending ? "Saving…" : "Save Preferences"}
+                    </Button>
+                  </div>
+                  <DietaryPreferencesForm
+                    value={dietaryDraft}
+                    onChange={(patch) => setDietaryDraft({ ...dietaryDraft, ...patch })}
+                  />
                 </div>
               </div>
 
