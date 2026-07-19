@@ -11,6 +11,18 @@ import type {
   ScanLogEntry,
   Venue,
   VenueEvent,
+  LeaderboardEntry, 
+  Player, 
+  Question, 
+  QuestionType,
+  Quiz, 
+  QuizDifficulty,
+  QuizEntryMethod, 
+  QuizRewardType, 
+  QuizSession, 
+  QuizSettings, 
+  QuizStatus, 
+  Reward,
 } from "@/types";
 
 
@@ -30,6 +42,15 @@ export interface MockDb {
   offers: Offer[];
   /** Flat User<->Offer relationship table — the single source of truth for assigned offers. */
   assignedOffers: AssignedOffer[];
+  /* Quiz Panel */
+  quizzes: Quiz[];
+  questions: Question[];
+  quizSessions: QuizSession[];
+  quizPlayers: Player[];
+  quizRewards: Reward[];
+  quizSettings: QuizSettings;
+  /** Final ranking snapshot for each ended/live session, keyed by session id. */
+  sessionLeaderboards: Record<string, LeaderboardEntry[]>;
 }
 
 function daysFromNow(days: number, hour = 19): string {
@@ -135,6 +156,244 @@ function offerBenefitSummary(o: Offer): string {
     default:
       return o.benefitDetails || o.type;
   }
+}
+
+const QUIZ_CATEGORIES = [
+  "Sports Trivia", "Movies", "Music", "General Knowledge",
+  "History", "Science", "Geography", "Pop Culture",
+];
+
+const QUIZ_DIFFICULTIES: QuizDifficulty[] = ["Easy", "Medium", "Hard"];
+const QUESTION_TYPES: QuestionType[] = [
+  "MCQ", "True/False", "Multiple Correct", "Image Question", "Logo Quiz", "Poll", "Survey",
+];
+const REWARD_TYPES: QuizRewardType[] = [
+  "Coupon", "Offer", "Free Drink", "Free Food", "Loyalty Points", "Gift Voucher",
+];
+const ENTRY_METHODS: QuizEntryMethod[] = ["QR Code", "PIN Code", "Invite Only"];
+
+function pinCode(seedNum: number): string {
+  return String(100000 + (seedNum * 9301 + 49297) % 900000);
+}
+
+function questionBank(venueId: string): Question[] {
+  const templates = [
+    "Which team won the {category} championship in {year}?",
+    "Who holds the record for most points in {category} history?",
+    "In what year did the famous {category} event take place?",
+    "Which of these belongs to the {category} category?",
+    "What is the correct answer about {category}?",
+  ];
+  return Array.from({ length: 300 }).map((_, i) => {
+    const category = pick(QUIZ_CATEGORIES, i);
+    const difficulty = pick(QUIZ_DIFFICULTIES, i * 2 + 1);
+    const type = pick(QUESTION_TYPES, i);
+    const year = 1990 + (i % 34);
+    const text = pick(templates, i)
+      .replace("{category}", category)
+      .replace("{year}", String(year));
+
+    let options: { id: string; label: string }[];
+    let correctOptionIds: string[] = [];
+
+    if (type === "True/False") {
+      options = [{ id: "A", label: "True" }, { id: "B", label: "False" }];
+      correctOptionIds = [i % 2 === 0 ? "A" : "B"];
+    } else if (type === "Poll" || type === "Survey") {
+      options = [
+        { id: "A", label: "Option A" }, { id: "B", label: "Option B" },
+        { id: "C", label: "Option C" }, { id: "D", label: "Option D" },
+      ];
+      correctOptionIds = [];
+    } else if (type === "Multiple Correct") {
+      options = [
+        { id: "A", label: `${category} Fact A` }, { id: "B", label: `${category} Fact B` },
+        { id: "C", label: `${category} Fact C` }, { id: "D", label: `${category} Fact D` },
+      ];
+      correctOptionIds = i % 2 === 0 ? ["A", "C"] : ["B", "D"];
+    } else {
+      options = [
+        { id: "A", label: `${category} Answer A` }, { id: "B", label: `${category} Answer B` },
+        { id: "C", label: `${category} Answer C` }, { id: "D", label: `${category} Answer D` },
+      ];
+      correctOptionIds = [pick(["A", "B", "C", "D"], i)];
+    }
+
+    return {
+      id: `q-${i + 1}`,
+      text,
+      imageUrl: type === "Image Question" || type === "Logo Quiz" ? `https://picsum.photos/seed/quiz${i}/400/240` : undefined,
+      type,
+      options,
+      correctOptionIds,
+      timeLimitSeconds: pick([10, 15, 20, 30, 45, 60], i),
+      points: pick([500, 750, 1000, 1500], i * 3),
+      explanation: `The correct answer relates to ${category} (${difficulty} difficulty).`,
+      category,
+      difficulty,
+      tags: [category.toLowerCase().replace(/\s+/g, "-"), difficulty.toLowerCase()],
+      usageCount: (i * 7) % 40,
+      enabled: i % 17 !== 0,
+      createdAt: daysFromNow(-(i % 120 + 1), 9),
+      venueId,
+    };
+  });
+}
+
+function quizCatalog(venueId: string, questions: Question[]): Quiz[] {
+  const statuses: QuizStatus[] = ["Draft", "Published", "Live", "Archived"];
+  return Array.from({ length: 20 }).map((_, i) => {
+    const category = pick(QUIZ_CATEGORIES, i);
+    const pool = questions.filter((q) => q.category === category && q.enabled);
+    const count = Math.min(12, Math.max(6, pool.length));
+    const questionIds = pool.slice(0, count).map((q) => q.id);
+    // Only one quiz is ever "Live" in the demo dataset (index 0).
+    const status: QuizStatus = i === 0 ? "Live" : statuses[(i + 1) % statuses.length] === "Live" ? "Published" : statuses[(i + 1) % statuses.length];
+
+    return {
+      id: `quiz-${i + 1}`,
+      name: `${category} Trivia Night ${i % 4 === 0 ? "Special" : `Vol. ${i + 1}`}`,
+      description: `A ${pick(QUIZ_DIFFICULTIES, i)}-difficulty ${category.toLowerCase()} quiz for match nights.`,
+      category,
+      difficulty: pick(QUIZ_DIFFICULTIES, i),
+      visibility: i % 4 === 0 ? "Private" : "Public",
+      entryMethod: pick(ENTRY_METHODS, i),
+      maxPlayers: pick([20, 30, 50, 100], i),
+      rewardType: pick(REWARD_TYPES, i),
+      startDate: daysFromNow(i - 10, 18),
+      endDate: daysFromNow(i - 10, 20),
+      shuffleQuestions: i % 2 === 0,
+      shuffleOptions: i % 3 !== 0,
+      allowLateJoin: i % 2 === 0,
+      showLeaderboard: true,
+      enableTimer: true,
+      autoNextQuestion: i % 2 === 0,
+      questionIds,
+      playersCount: 10 + ((i * 13) % 90),
+      status,
+      pinCode: pinCode(i + 1),
+      createdAt: daysFromNow(-(i * 4 + 5), 9),
+      venueId,
+    };
+  });
+}
+
+function quizPlayerRoster(venueId: string): Player[] {
+  const colors = ["#f97316", "#3b82f6", "#22c55e", "#a855f7", "#ec4899", "#06b6d4", "#eab308"];
+  return Array.from({ length: 100 }).map((_, i) => ({
+    id: `qp-${i + 1}`,
+    name: name(i + 40),
+    tableNumber: `T${1 + (i % 24)}`,
+    avatarColor: pick(colors, i),
+    totalScore: (i * 137) % 15000,
+    quizzesPlayed: 1 + (i % 22),
+    wins: i % 9 === 0 ? 1 + (i % 4) : 0,
+    joinedAt: daysFromNow(-(i % 200 + 1), 12),
+    status: i % 29 === 0 ? "Banned" : "Active",
+    connectionStatus: i % 11 === 0 ? "Disconnected" : "Connected",
+    venueId,
+  }));
+}
+
+function quizSessionsAndLeaderboards(
+  venueId: string,
+  quizzes: Quiz[],
+  players: Player[],
+): { sessions: QuizSession[]; leaderboards: Record<string, LeaderboardEntry[]> } {
+  const sessions: QuizSession[] = [];
+  const leaderboards: Record<string, LeaderboardEntry[]> = {};
+
+  for (let i = 0; i < 50; i++) {
+    const quiz = pick(quizzes, i);
+    const sessionPlayers = Array.from({ length: 8 + (i % 12) }).map((_, j) => pick(players, i * 5 + j));
+    const uniquePlayers = Array.from(new Map(sessionPlayers.map((p) => [p.id, p])).values());
+
+    const session: QuizSession = {
+      id: `sess-${i + 1}`,
+      quizId: quiz.id,
+      quizName: quiz.name,
+      status: "Ended",
+      pinCode: quiz.pinCode,
+      currentQuestionIndex: quiz.questionIds.length - 1,
+      startedAt: daysFromNow(-(i + 1), 19),
+      endedAt: daysFromNow(-(i + 1), 20),
+      playerIds: uniquePlayers.map((p) => p.id),
+      venueId,
+    };
+    sessions.push(session);
+
+    const board: LeaderboardEntry[] = uniquePlayers
+      .map((p, rank) => ({
+        playerId: p.id,
+        playerName: p.name,
+        score: 1000 + ((i * 37 + rank * 211) % 9000),
+        correctAnswers: 3 + ((i + rank) % 9),
+        fastestResponseMs: 900 + ((i * 53 + rank * 97) % 4000),
+        rank: 0,
+        rankChange: (rank % 3) - 1,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+
+    leaderboards[session.id] = board;
+  }
+
+  return { sessions, leaderboards };
+}
+
+function quizRewardsFromSessions(
+  quizzes: Quiz[],
+  sessions: QuizSession[],
+  leaderboards: Record<string, LeaderboardEntry[]>,
+): Reward[] {
+  const rewards: Reward[] = [];
+  for (const session of sessions) {
+    const quiz = quizzes.find((q) => q.id === session.quizId);
+    if (!quiz) continue;
+    const board = leaderboards[session.id] ?? [];
+    const topN = board.slice(0, 3);
+    topN.forEach((entry, idx) => {
+      rewards.push({
+        id: `reward-${session.id}-${entry.playerId}`,
+        playerId: entry.playerId,
+        playerName: entry.playerName,
+        sessionId: session.id,
+        quizName: quiz.name,
+        type: quiz.rewardType,
+        description: `${quiz.rewardType} for finishing #${idx + 1} in ${quiz.name}`,
+        rank: idx + 1,
+        assignedAt: session.endedAt ?? session.startedAt ?? new Date().toISOString(),
+        status: idx === 0 ? "Delivered" : "Pending",
+        venueId: quiz.venueId,
+      });
+    });
+  }
+  return rewards;
+}
+
+function seedQuizModule(venueId: string) {
+  const questions = questionBank(venueId);
+  const quizzes = quizCatalog(venueId, questions);
+  const quizPlayers = quizPlayerRoster(venueId);
+  const { sessions: quizSessions, leaderboards: sessionLeaderboards } =
+    quizSessionsAndLeaderboards(venueId, quizzes, quizPlayers);
+  const quizRewards = quizRewardsFromSessions(quizzes, quizSessions, sessionLeaderboards);
+  const quizSettings: QuizSettings = {
+    defaultTimerSeconds: 20,
+    defaultPoints: 1000,
+    shuffleQuestions: true,
+    shuffleOptions: true,
+    showCorrectAnswer: true,
+    enableSounds: true,
+    enableCountdown: true,
+    maxPlayers: 100,
+    allowRejoin: true,
+    enableQrJoin: true,
+    autoLeaderboard: true,
+    venueId,
+  };
+
+  return { questions, quizzes, quizPlayers, quizSessions, sessionLeaderboards, quizRewards, quizSettings };
 }
 
 function seed(): MockDb {
@@ -455,9 +714,12 @@ function seed(): MockDb {
     buildAssignedOffersForUser(u.id, i, offers),
   );
 
+  const quizModule = seedQuizModule(DEMO_VENUE_ID);
+
   return {
     orders, menu, events, games, users, bookings, notifications,
     scanLogs: [], platformUsers, venues, offers, assignedOffers,
+    ...quizModule,
   };
 }
 
@@ -472,3 +734,4 @@ export function db(): MockDb {
 export function uid(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
 }
+
