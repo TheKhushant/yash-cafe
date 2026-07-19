@@ -305,3 +305,179 @@ export interface PlatformUser {
   /** Offers assigned to this user. Optional/absent for platform admin accounts. */
   assignedOffers?: AssignedOffer[];
 }
+
+/* ------------------------------------------------------------------ */
+/* Quiz Panel                                                          */
+/* ------------------------------------------------------------------ */
+
+export type QuizDifficulty = "Easy" | "Medium" | "Hard";
+export type QuizVisibility = "Public" | "Private";
+export type QuizEntryMethod = "QR Code" | "PIN Code" | "Invite Only";
+export type QuizStatus = "Draft" | "Published" | "Live" | "Archived";
+export type QuizRewardType =
+  | "Coupon"
+  | "Offer"
+  | "Free Drink"
+  | "Free Food"
+  | "Loyalty Points"
+  | "Gift Voucher";
+
+export interface Quiz {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  difficulty: QuizDifficulty;
+  visibility: QuizVisibility;
+  entryMethod: QuizEntryMethod;
+  maxPlayers: number;
+  rewardType: QuizRewardType;
+  startDate: string;
+  endDate: string;
+  shuffleQuestions: boolean;
+  shuffleOptions: boolean;
+  allowLateJoin: boolean;
+  showLeaderboard: boolean;
+  enableTimer: boolean;
+  autoNextQuestion: boolean;
+  questionIds: string[];
+  playersCount: number;
+  status: QuizStatus;
+  pinCode: string;
+  createdAt: string;
+  venueId: string;
+}
+
+export type QuestionType =
+  | "MCQ"
+  | "True/False"
+  | "Multiple Correct"
+  | "Image Question"
+  | "Logo Quiz"
+  | "Poll"
+  | "Survey";
+
+export interface QuestionOption {
+  id: string;
+  label: string;
+}
+
+export interface Question {
+  id: string;
+  text: string;
+  imageUrl?: string;
+  type: QuestionType;
+  options: QuestionOption[];
+  /** Empty for Poll/Survey question types, which have no single correct answer. */
+  correctOptionIds: string[];
+  timeLimitSeconds: number;
+  points: number;
+  explanation?: string;
+  category: string;
+  difficulty: QuizDifficulty;
+  tags: string[];
+  usageCount: number;
+  enabled: boolean;
+  createdAt: string;
+  venueId: string;
+}
+
+export type QuizSessionStatus = "Waiting" | "Live" | "Paused" | "Ended";
+
+export interface QuizSession {
+  id: string;
+  quizId: string;
+  quizName: string;
+  status: QuizSessionStatus;
+  pinCode: string;
+  /** -1 before the host presses Start. */
+  currentQuestionIndex: number;
+  startedAt: string | null;
+  endedAt: string | null;
+  playerIds: string[];
+  venueId: string;
+}
+
+export type PlayerStatus = "Active" | "Banned";
+export type PlayerConnectionStatus = "Connected" | "Disconnected";
+
+export interface Player {
+  id: string;
+  name: string;
+  tableNumber: string;
+  avatarColor: string;
+  totalScore: number;
+  quizzesPlayed: number;
+  wins: number;
+  joinedAt: string;
+  status: PlayerStatus;
+  connectionStatus: PlayerConnectionStatus;
+  venueId: string;
+}
+
+export interface PlayerAnswer {
+  id: string;
+  sessionId: string;
+  playerId: string;
+  questionId: string;
+  selectedOptionIds: string[];
+  correct: boolean;
+  responseTimeMs: number;
+  pointsAwarded: number;
+  answeredAt: string;
+}
+
+export type RewardStatus = "Pending" | "Delivered";
+
+export interface Reward {
+  id: string;
+  playerId: string;
+  playerName: string;
+  sessionId: string;
+  quizName: string;
+  type: QuizRewardType;
+  description: string;
+  rank: number;
+  assignedAt: string;
+  status: RewardStatus;
+  venueId: string;
+}
+
+export interface LeaderboardEntry {
+  playerId: string;
+  playerName: string;
+  score: number;
+  correctAnswers: number;
+  fastestResponseMs: number;
+  rank: number;
+  /** Positive = moved up since last check, negative = moved down, 0 = unchanged. */
+  rankChange: number;
+}
+
+export interface QuizSettings {
+  defaultTimerSeconds: number;
+  defaultPoints: number;
+  shuffleQuestions: boolean;
+  shuffleOptions: boolean;
+  showCorrectAnswer: boolean;
+  enableSounds: boolean;
+  enableCountdown: boolean;
+  maxPlayers: number;
+  allowRejoin: boolean;
+  enableQrJoin: boolean;
+  autoLeaderboard: boolean;
+  venueId: string;
+}
+
+export interface QuizReportSummary {
+  totalParticipation: number;
+  accuracyRate: number;
+  avgResponseTimeMs: number;
+  mostMissedQuestions: { questionId: string; text: string; missRate: number }[];
+  topPlayers: { playerId: string; name: string; score: number }[];
+  topCategories: { category: string; plays: number }[];
+  dailyQuizzes: { label: string; count: number }[];
+  monthlyQuizzes: { label: string; count: number }[];
+  participationSeries: { label: string; players: number }[];
+  accuracySeries: { label: string; accuracy: number }[];
+}

@@ -22,6 +22,15 @@ import UsersPage from "@/pages/users";
 import { useAuthStore } from "@/stores/auth-store";
 import NotificationsPage from "@/pages/notifications";
 import OffersPage from "@/pages/offers";
+import QuizDashboardPage from "@/pages/quiz/dashboard";
+import LiveQuizPage from "@/pages/quiz/live";
+import QuizLibraryPage from "@/pages/quiz/library";
+import QuestionBankPage from "@/pages/quiz/questions";
+import QuizPlayersPage from "@/pages/quiz/players";
+import LeaderboardPage from "@/pages/quiz/leaderboard";
+import RewardsPage from "@/pages/quiz/rewards";
+import QuizReportsPage from "@/pages/quiz/reports";
+import QuizSettingsPage from "@/pages/quiz/settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +93,15 @@ export function AppRouter() {
               <Route path="/platform-analytics" element={<PlatformAnalyticsPage />} />
               <Route path="/system-settings" element={<SystemSettingsPage />} />
               <Route path="/offers" element={<OffersPage />} />
+              <Route path="/quiz" element={<QuizDashboardPage />} />
+              <Route path="/quiz/live" element={<LiveQuizPage />} />
+              <Route path="/quiz/library" element={<QuizLibraryPage />} />
+              <Route path="/quiz/questions" element={<QuestionBankPage />} />
+              <Route path="/quiz/players" element={<QuizPlayersPage />} />
+              <Route path="/quiz/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/quiz/rewards" element={<RewardsPage />} />
+              <Route path="/quiz/reports" element={<QuizReportsPage />} />
+              <Route path="/quiz/settings" element={<QuizSettingsPage />} />
 
             </Route>
           </Route>
@@ -94,4 +112,3 @@ export function AppRouter() {
     </QueryClientProvider>
   );
 }
-
