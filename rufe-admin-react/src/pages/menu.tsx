@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2, Heart, Sparkles } from "lucide-react";
+import { Pencil, Plus, Trash2, Heart, Utensils   } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -162,7 +162,7 @@ export default function MenuPage() {
         <div className="flex items-center justify-end gap-1">
           <Switch checked={!m.outOfStock} onCheckedChange={(v) => patch.mutate({ id: m.id, data: { outOfStock: !v } })} title="In stock" />
           <Button variant="ghost" size="icon" className="size-8" onClick={() => setRecommending(m)} title="Recommend to customer">
-            <Sparkles className="size-4" />
+            <Utensils  className="size-4" />
           </Button>
           <Button variant="ghost" size="icon" className="size-8" onClick={() => openEdit(m)}><Pencil className="size-4" /></Button>
           <Button variant="ghost" size="icon" className="size-8 text-destructive" onClick={() => setToDelete(m)}><Trash2 className="size-4" /></Button>
