@@ -25,18 +25,23 @@ export const notificationsService = {
     return data;
   },
 
-  async send(input: NotificationInput, venueId: string | null): Promise<AppNotification> {
+  async send(
+    input: NotificationInput,
+    venueId: string | null,
+    userId?: string,
+  ): Promise<AppNotification> {
     if (USE_MOCKS) {
       const ntf: AppNotification = {
         id: uid("ntf"),
         venueId: venueId ?? DEMO_VENUE_ID,
         sentAt: new Date().toISOString(),
+        userId,
         ...input,
       };
       db().notifications.unshift(ntf);
       return delay(ntf, 250);
     }
-    const { data } = await apiClient.post<AppNotification>("/notifications", input);
+    const { data } = await apiClient.post<AppNotification>("/notifications", { ...input, userId });
     return data;
   },
   

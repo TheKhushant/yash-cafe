@@ -13,7 +13,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { toast } from "sonner";
-
+import { assignedOffersService } from "@/lib/api/services/assigned-offers";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type Column } from "@/components/shared/DataTable";
 import { KpiCard } from "@/components/shared/KpiCard";
@@ -251,6 +251,12 @@ export default function OffersPage() {
   const offers = useQuery({
     queryKey: ["offers", scope],
     queryFn: () => offersService.list(scope),
+  });
+
+  const assignedUsers = useQuery({
+    queryKey: ["offer-assigned-users", viewing?.id],
+    queryFn: () => assignedOffersService.listForOffer(viewing!.id),
+    enabled: !!viewing,
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["offers"] });
@@ -743,6 +749,7 @@ export default function OffersPage() {
                 <div><p className="text-xs text-muted-foreground">Max Redemptions</p><p className="font-medium">{viewing.maxRedemptions ?? "Unlimited"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Created</p><p className="font-medium">{formatDate(viewing.createdAt)}</p></div>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border p-3 text-center">
                   <p className="text-2xl font-bold text-foreground">{viewing.assignedCount}</p>
@@ -751,6 +758,35 @@ export default function OffersPage() {
                 <div className="rounded-lg border p-3 text-center">
                   <p className="text-2xl font-bold text-foreground">{viewing.redeemedCount}</p>
                   <p className="text-xs text-muted-foreground">Redeemed</p>
+                </div>
+              </div>
+              <div>
+                <h4 className="mb-2 text-sm font-semibold text-foreground">Assigned Users</h4>
+                <div className="max-h-56 space-y-2 overflow-y-auto">
+                  {assignedUsers.isLoading ? (
+                    <p className="text-sm text-muted-foreground">Loading…</p>
+                  ) : (assignedUsers.data ?? []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      This offer hasn't been assigned to any customer yet.
+                    </p>
+                  ) : (
+                    assignedUsers.data!.map((a) => (
+                      <div key={a.id} className="flex items-center justify-between rounded-lg border px-3 py-2">
+                        <div>
+                          <p className="font-medium text-foreground">{a.userName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Assigned {formatDate(a.assignedAt)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            Expires {formatDate(a.expiryDate)}
+                          </span>
+                          <StatusBadge status={a.status} />
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

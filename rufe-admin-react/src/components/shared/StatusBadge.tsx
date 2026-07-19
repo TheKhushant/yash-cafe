@@ -32,6 +32,9 @@ const STATUS_TONE: Record<string, Tone> = {
   Expired: "neutral",
   PaymentPending: "warning",
   Paid: "success",
+  // Assigned offers
+  Assigned: "success",
+  Used: "info",
 };
 
 export function StatusBadge({

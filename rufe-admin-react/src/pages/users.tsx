@@ -1,39 +1,93 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { MoreHorizontal, QrCode, Tag } from "lucide-react";
 
+import { AssignOfferDialog } from "@/components/shared/AssignOfferDialog";
+import { AssignedOfferQrDialog } from "@/components/shared/AssignedOfferQrDialog";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type Column } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TableSkeleton } from "@/components/shared/Skeletons";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
+import { assignedOffersService } from "@/lib/api/services/assigned-offers";
 import { usersService } from "@/lib/api/services/users";
 import { formatCurrencyPrecise, formatDate, formatDateTime } from "@/lib/format";
 import type { AssignedOffer, AssignedOfferStatus, PlatformUser } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
 const ASSIGNED_OFFER_TONE: Record<AssignedOfferStatus, "success" | "info" | "neutral" | "danger"> = {
-  Active: "success",
-  Redeemed: "info",
+  Assigned: "success",
+  Used: "info",
   Expired: "neutral",
   Cancelled: "danger",
 };
 
-function AssignedOfferCard({ offer }: { offer: AssignedOffer }) {
+function AssignedOfferCard({
+  offer,
+  onCancel,
+  onResend,
+  onViewQr,
+}: {
+  offer: AssignedOffer;
+  onCancel?: (offer: AssignedOffer) => void;
+  onResend?: (offer: AssignedOffer) => void;
+  onViewQr?: (offer: AssignedOffer) => void;
+}) {
+  const showActions = onCancel || onResend || onViewQr;
   return (
     <div className="space-y-2 text-sm">
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium text-foreground">{offer.name}</span>
-        <StatusBadge status={offer.status} tone={ASSIGNED_OFFER_TONE[offer.status]} />
+        <div className="flex items-center gap-1">
+          <StatusBadge status={offer.status} tone={ASSIGNED_OFFER_TONE[offer.status]} />
+          {showActions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-7" onClick={(e) => e.stopPropagation()}>
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                {onViewQr && (
+                  <DropdownMenuItem onClick={() => onViewQr(offer)}>
+                    <QrCode className="size-4" /> View QR
+                  </DropdownMenuItem>
+                )}
+                {onResend && (
+                  <DropdownMenuItem onClick={() => onResend(offer)}>
+                    Resend Notification
+                  </DropdownMenuItem>
+                )}
+                {onCancel && offer.status === "Assigned" && (
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => onCancel(offer)}
+                  >
+                    Cancel Offer
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
       <p className="text-xs text-muted-foreground">
         {offer.type}
         {offer.code ? ` • Code: ${offer.code}` : ""}
+        {offer.discountSummary ? ` • ${offer.discountSummary}` : ""}
       </p>
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div>
@@ -41,8 +95,18 @@ function AssignedOfferCard({ offer }: { offer: AssignedOffer }) {
           <p className="font-medium text-foreground">{formatDateTime(offer.assignedAt)}</p>
         </div>
         <div>
-          <p className="text-muted-foreground">Expires</p>
-          <p className="font-medium text-foreground">{formatDateTime(offer.expiresAt)}</p>
+          <p className="text-muted-foreground">Valid From</p>
+          <p className="font-medium text-foreground">{formatDate(offer.validFrom)}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Expiry</p>
+          <p className="font-medium text-foreground">{formatDate(offer.expiryDate)}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Used At</p>
+          <p className="font-medium text-foreground">
+            {offer.usedAt ? formatDateTime(offer.usedAt) : "—"}
+          </p>
         </div>
       </div>
     </div>
@@ -53,6 +117,9 @@ export default function UsersPage() {
   const scope = useAuthStore((s) => s.venueScope)();
   const qc = useQueryClient();
   const [active, setActive] = useState<PlatformUser | null>(null);
+  const [assignOfferOpen, setAssignOfferOpen] = useState(false);
+  const [qrOffer, setQrOffer] = useState<AssignedOffer | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<AssignedOffer | null>(null);
 
   const users = useQuery({ queryKey: ["users", scope], queryFn: () => usersService.list(scope) });
   const history = useQuery({
@@ -68,6 +135,21 @@ export default function UsersPage() {
       setActive((cur) => (cur ? { ...cur, status: u.status } : cur));
       toast.success(`${u.name} ${u.status === "Blocked" ? "blocked" : "unblocked"}`);
     },
+  });
+
+  const cancelOffer = useMutation({
+    mutationFn: (offer: AssignedOffer) => assignedOffersService.cancel(offer.id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Offer assignment cancelled");
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Could not cancel offer"),
+  });
+
+  const resendOffer = useMutation({
+    mutationFn: (offer: AssignedOffer) => assignedOffersService.resendNotification(offer.id, scope),
+    onSuccess: () => toast.success("Notification resent"),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Could not resend notification"),
   });
 
   const columns: Column<PlatformUser>[] = [
@@ -125,22 +207,33 @@ export default function UsersPage() {
 
       <Sheet open={!!active} onOpenChange={(o) => !o && setActive(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">
-          {active ? (
+          {active ? (() => {
+            // Always render the freshest copy of this user (status + assigned offers)
+            // so cancel/resend/assign actions reflect immediately without closing the sheet.
+            const current = users.data?.find((u) => u.id === active.id) ?? active;
+            return (
             <>
               <SheetHeader>
-                <SheetTitle>{active.name}</SheetTitle>
-                <SheetDescription>{active.email}</SheetDescription>
+                <SheetTitle>{current.name}</SheetTitle>
+                <SheetDescription>{current.email}</SheetDescription>
               </SheetHeader>
               <div className="mt-4 space-y-6 px-4 pb-6">
                 <div className="flex items-center justify-between">
-                  <StatusBadge status={active.status} />
-                  <Button
-                    variant={active.status === "Blocked" ? "default" : "destructive"}
-                    size="sm"
-                    onClick={() => setStatus.mutate({ id: active.id, status: active.status === "Blocked" ? "Active" : "Blocked" })}
-                  >
-                    {active.status === "Blocked" ? "Unblock" : "Block"}
-                  </Button>
+                  <StatusBadge status={current.status} />
+                  <div className="flex items-center gap-2">
+                    {current.status === "Active" && (
+                      <Button size="sm" variant="outline" onClick={() => setAssignOfferOpen(true)}>
+                        <Tag className="size-4" /> Assign Offer
+                      </Button>
+                    )}
+                    <Button
+                      variant={current.status === "Blocked" ? "default" : "destructive"}
+                      size="sm"
+                      onClick={() => setStatus.mutate({ id: current.id, status: current.status === "Blocked" ? "Active" : "Blocked" })}
+                    >
+                      {current.status === "Blocked" ? "Unblock" : "Block"}
+                    </Button>
+                  </div>
                 </div>
 
                 <div>
@@ -174,24 +267,52 @@ export default function UsersPage() {
                 <div>
                   <h4 className="mb-2 text-sm font-semibold">Assigned offers</h4>
                   <div className="space-y-2">
-                    {(active.assignedOffers ?? []).length === 0 ? (
+                    {(current.assignedOffers ?? []).length === 0 ? (
                       <p className="text-sm text-muted-foreground">
                         No offers have been assigned to this customer.
                       </p>
                     ) : (
-                      active.assignedOffers!.map((o) => (
+                      current.assignedOffers!.map((o) => (
                         <div key={o.id} className="rounded-lg border px-3 py-2.5">
-                          <AssignedOfferCard offer={o} />
+                          <AssignedOfferCard
+                            offer={o}
+                            onViewQr={setQrOffer}
+                            onResend={(offer) => resendOffer.mutate(offer)}
+                            onCancel={setCancelTarget}
+                          />
                         </div>
                       ))
                     )}
                   </div>
                 </div>
               </div>
+
+              <AssignOfferDialog
+                open={assignOfferOpen}
+                onOpenChange={setAssignOfferOpen}
+                userId={current.id}
+                userName={current.name}
+              />
             </>
-          ) : null}
+            );
+          })() : null}
         </SheetContent>
       </Sheet>
+
+      <AssignedOfferQrDialog offer={qrOffer} onOpenChange={(o) => !o && setQrOffer(null)} />
+
+      <ConfirmDialog
+        open={!!cancelTarget}
+        onOpenChange={(o) => !o && setCancelTarget(null)}
+        title="Cancel this offer?"
+        description={`"${cancelTarget?.name}" will no longer be usable by this customer.`}
+        destructive
+        confirmLabel="Cancel Offer"
+        onConfirm={() => {
+          if (cancelTarget) cancelOffer.mutate(cancelTarget);
+          setCancelTarget(null);
+        }}
+      />
     </div>
   );
 }

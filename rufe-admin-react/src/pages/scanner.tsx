@@ -8,12 +8,18 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { bookingsService } from "@/lib/api/services/bookings";
+import { assignedOffersService } from "@/lib/api/services/assigned-offers";
 import { useAuthStore } from "@/stores/auth-store";
 import type { CheckInResult } from "@/lib/api/services/bookings";
+import type { RedeemResult } from "@/lib/api/services/assigned-offers";
+
+type ScanOutcome =
+  | (CheckInResult & { kind: "booking" })
+  | (RedeemResult & { kind: "offer" });
 
 export default function QRScannerPage() {
   const [scanning, setScanning] = useState(false);
-  const [result, setResult] = useState<CheckInResult | null>(null);
+  const [result, setResult] = useState<ScanOutcome | null>(null);
   const [scanHistory, setScanHistory] = useState<any[]>([]);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const user = useAuthStore((s) => s.user);
@@ -30,8 +36,33 @@ export default function QRScannerPage() {
     scanner.render(
       async (decodedText) => {
         try {
+          const isAssignedOffer = assignedOffersService.parseQr(decodedText) !== null;
+
+          if (isAssignedOffer) {
+            const redeemResult = await assignedOffersService.redeem(decodedText);
+            const outcome: ScanOutcome = { ...redeemResult, kind: "offer" };
+            setResult(outcome);
+
+            if (redeemResult.ok) {
+              toast.success("Offer Valid — Redeemed");
+            } else {
+              toast.error(redeemResult.reason);
+            }
+
+            setScanHistory((prev) => [{
+              id: Date.now(),
+              payload: decodedText,
+              result: outcome,
+              time: new Date().toLocaleTimeString(),
+            }, ...prev].slice(0, 10));
+
+            if (redeemResult.ok) setTimeout(() => setResult(null), 3000);
+            return;
+          }
+
           const checkInResult = await bookingsService.checkIn(decodedText, user?.name || "Admin");
-          setResult(checkInResult);
+          const outcome: ScanOutcome = { ...checkInResult, kind: "booking" };
+          setResult(outcome);
 
           if (checkInResult.ok) {
             toast.success("Entry Approved!");
@@ -43,7 +74,7 @@ export default function QRScannerPage() {
           setScanHistory(prev => [{
             id: Date.now(),
             payload: decodedText,
-            result: checkInResult,
+            result: outcome,
             time: new Date().toLocaleTimeString()
           }, ...prev].slice(0, 10));
 
@@ -53,7 +84,7 @@ export default function QRScannerPage() {
           }
         } catch (err) {
           toast.error("Scan failed");
-          setResult({ ok: false, reason: "Scan error" });
+          setResult({ ok: false, reason: "Scan error", kind: "booking" });
         }
       },
       (error) => {
@@ -123,13 +154,21 @@ export default function QRScannerPage() {
                   )}
                   <div className="flex-1">
                     <div className="text-xl font-semibold mb-1">
-                      {result.ok ? "ENTRY GRANTED" : result.reason.toUpperCase()}
+                      {result.ok ? (result.kind === "offer" ? "OFFER VALID" : "ENTRY GRANTED") : result.reason.toUpperCase()}
                     </div>
-                    {result.booking && (
+                    {result.kind === "booking" && result.booking && (
                       <div className="space-y-2 text-sm mt-4">
                         <div className="flex items-center gap-2"><User className="size-4" /> {result.booking.customerName}</div>
                         <div className="flex items-center gap-2"><Calendar className="size-4" /> {result.booking.eventTitle}</div>
                         <div className="flex items-center gap-2"><MapPin className="size-4" /> Table {result.booking.tableNumber}</div>
+                      </div>
+                    )}
+                    {result.kind === "offer" && result.assignedOffer && (
+                      <div className="space-y-2 text-sm mt-4">
+                        <div className="flex items-center gap-2"><QrCode className="size-4" /> {result.assignedOffer.name}</div>
+                        {result.assignedOffer.discountSummary && (
+                          <div className="text-muted-foreground">{result.assignedOffer.discountSummary}</div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -157,7 +196,11 @@ export default function QRScannerPage() {
                       {scan.result.ok ? <CheckCircle className="size-4" /> : <XCircle className="size-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{scan.result.booking?.customerName || "Unknown"}</div>
+                      <div className="font-medium text-sm truncate">
+                        {scan.result.kind === "offer"
+                          ? scan.result.assignedOffer?.name || "Offer"
+                          : scan.result.booking?.customerName || "Unknown"}
+                      </div>
                       <div className="text-xs text-muted-foreground">{scan.result.reason}</div>
                       <div className="text-[10px] text-muted-foreground mt-1">{scan.time}</div>
                     </div>

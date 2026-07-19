@@ -1,5 +1,12 @@
 export type Role = "user" | "admin" | "super_admin";
-export type AssignedOfferStatus = "Active" | "Redeemed" | "Expired" | "Cancelled";
+/**
+ * Lifecycle status of an Offer once it has been assigned to a specific user.
+ * Assigned  -> newly granted, not usable until `validFrom`
+ * Used      -> redeemed via QR scan
+ * Expired   -> past `expiryDate` without being used
+ * Cancelled -> revoked by an admin before use
+ */
+export type AssignedOfferStatus = "Assigned" | "Used" | "Expired" | "Cancelled";
 
 
 export interface AuthUser {
@@ -126,18 +133,6 @@ export interface Game {
 
 export type UserStatus = "Active" | "Blocked";
 
-export interface PlatformUser {
-  id: string;
-  name: string;
-  email: string;
-  status: UserStatus;
-  joinedAt: string;
-  totalBookings: number;
-  totalOrders: number;
-  venueId: string | null;
-  role: "user" | "admin" | "super_admin";
-}
-
 export type BookingStatus =
   | "Confirmed"
   | "Cancelled"
@@ -178,7 +173,11 @@ export interface ScanLogEntry {
   scannedAt: string;
 }
 
-export type NotificationType = "Announcement" | "Match Reminder" | "Order Ready";
+export type NotificationType =
+  | "Announcement"
+  | "Match Reminder"
+  | "Order Ready"
+  | "Offer Assigned";
 
 export interface AppNotification {
   id: string;
@@ -188,6 +187,8 @@ export interface AppNotification {
   audience: string;
   sentAt: string;
   venueId: string;
+  /** Present when this notification targets a single customer (e.g. offer assignment). */
+  userId?: string;
 }
 
 export interface DashboardStats {
@@ -251,14 +252,44 @@ export interface Paginated<T> {
   total: number;
 }
 
+/**
+ * The relationship record connecting a User to an Offer.
+ * The underlying Offer is never mutated — this row tracks the
+ * per-user lifecycle (validity window, redemption, cancellation).
+ */
 export interface AssignedOffer {
   id: string;
+  userId: string;
+  offerId: string;
+  /** Denormalized snapshot of the offer at assignment time, for display without a join. */
   name: string;
   type: string;
   code?: string;
+  discountSummary?: string;
+  description?: string;
   assignedAt: string;
-  expiresAt: string;
+  /** First moment the offer becomes usable — always the day after `assignedAt`. */
+  validFrom: string;
+  expiryDate: string;
   status: AssignedOfferStatus;
+  usedAt: string | null;
+  venueId: string;
+}
+
+/** AssignedOffer joined with the customer it belongs to, for the Offer Details "Assigned Users" view. */
+export interface AssignedOfferWithUser extends AssignedOffer {
+  userName: string;
+  userEmail: string;
+}
+
+/** Payload encoded into the QR code shown to a customer for a specific assigned offer. */
+export interface AssignedOfferQrPayload {
+  assignedOfferId: string;
+  userId: string;
+  offerId: string;
+  expiryDate: string;
+  /** Lightweight integrity token; a real backend would issue a signed JWT/HMAC here instead. */
+  token: string;
 }
 
 export interface PlatformUser {

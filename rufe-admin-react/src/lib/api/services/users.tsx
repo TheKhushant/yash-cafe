@@ -7,9 +7,17 @@ function scoped(venueId: string | null): PlatformUser[] {
   return venueId ? all.filter((u) => u.venueId === venueId) : all;
 }
 
+/** Joins each user with their current assigned offers from the flat relationship table. */
+function withAssignedOffers(users: PlatformUser[]): PlatformUser[] {
+  return users.map((u) => ({
+    ...u,
+    assignedOffers: db().assignedOffers.filter((a) => a.userId === u.id),
+  }));
+}
+
 export const usersService = {
   async list(venueId: string | null): Promise<PlatformUser[]> {
-    if (USE_MOCKS) return delay([...scoped(venueId)]);
+    if (USE_MOCKS) return delay(withAssignedOffers(scoped(venueId)));
     const { data } = await apiClient.get<PlatformUser[]>("/users", { params: { venueId } });
     return data;
   },

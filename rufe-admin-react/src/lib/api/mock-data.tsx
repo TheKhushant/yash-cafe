@@ -28,6 +28,8 @@ export interface MockDb {
   venues: Venue[];
   platformUsers: PlatformUser[];
   offers: Offer[];
+  /** Flat User<->Offer relationship table — the single source of truth for assigned offers. */
+  assignedOffers: AssignedOffer[];
 }
 
 function daysFromNow(days: number, hour = 19): string {
@@ -80,44 +82,59 @@ const orderStatuses: Order["status"][] = [
   "Paid", "Order Recived", "Cancelled",
 ];
 
-export interface MockDb {
-  orders: Order[];
-  menu: MenuItem[];
-  events: VenueEvent[];
-  games: Game[];
-  users: PlatformUser[];
-  bookings: Booking[];
-  notifications: AppNotification[];
-  scanLogs: ScanLogEntry[];
-  venues: Venue[];
-  platformUsers: PlatformUser[];
-}
-
-const userOfferCatalog: { name: string; type: string; code?: string }[] = [
-  { name: "Free Dessert", type: "Dessert", code: "DESSERT100" },
-  { name: "20% OFF", type: "Coupon", code: "SAVE20" },
-  { name: "Free Drink", type: "Drinks" },
-  { name: "Buy 1 Get 1 Burger", type: "Combo", code: "BOGOBURGER" },
-  { name: "Flat $10 Off", type: "Flat Discount", code: "FLAT10" },
-];
-
-const assignedOfferStatuses: AssignedOfferStatus[] = ["Active", "Redeemed", "Expired", "Cancelled"];
-
-function buildAssignedOffers(i: number): AssignedOffer[] {
+/**
+ * Deterministically decide, for demo-seeding purposes, how many offers (and which ones,
+ * from the already-created `offers` catalog) a given user index should have assigned.
+ * Real assignments always go through `assignedOffersService.assign`.
+ */
+function buildAssignedOffersForUser(
+  userId: string,
+  i: number,
+  offers: Offer[],
+): AssignedOffer[] {
   const count = i % 5; // yields a mix of 0, 1, 2, 3, 4 offers per user
+  const statuses: AssignedOfferStatus[] = ["Assigned", "Used", "Expired", "Cancelled"];
   return Array.from({ length: count }).map((_, j) => {
-    const item = userOfferCatalog[(i + j) % userOfferCatalog.length];
+    const offer = offers[(i + j) % offers.length];
     const assignedDaysAgo = i + j * 3 + 1;
+    const assignedAt = daysFromNow(-assignedDaysAgo, 10 + (j % 8));
+    const validFrom = daysFromNow(-assignedDaysAgo + 1, 0);
+    const expiryDate = daysFromNow(-assignedDaysAgo + 4, 23);
+    const status = statuses[(i + j) % statuses.length];
     return {
       id: `uoff-${i}-${j}`,
-      name: item.name,
-      type: item.type,
-      code: item.code,
-      assignedAt: daysFromNow(-assignedDaysAgo, 10 + (j % 8)),
-      expiresAt: daysFromNow(-assignedDaysAgo + 3, 10 + (j % 8)),
-      status: assignedOfferStatuses[(i + j) % assignedOfferStatuses.length],
+      userId,
+      offerId: offer.id,
+      name: offer.name,
+      type: offer.type,
+      code: offer.code,
+      discountSummary: offerBenefitSummary(offer),
+      description: offer.description,
+      assignedAt,
+      validFrom,
+      expiryDate,
+      status,
+      usedAt: status === "Used" ? daysFromNow(-assignedDaysAgo + 2, 12 + (j % 6)) : null,
+      venueId: offer.venueId,
     };
   });
+}
+
+function offerBenefitSummary(o: Offer): string {
+  switch (o.type) {
+    case "Flat Discount":
+      return `$${o.discountValue ?? 0} off`;
+    case "Percentage Discount":
+      return `${o.discountValue ?? 0}% off`;
+    case "Cashback":
+      return `$${o.discountValue ?? 0} cashback`;
+    case "Free Item":
+      return `Free ${o.freeItemName || "item"}`;
+    case "Coupon Code":
+      return o.code ? `Code: ${o.code}` : "Coupon";
+    default:
+      return o.benefitDetails || o.type;
+  }
 }
 
 function seed(): MockDb {
@@ -198,7 +215,6 @@ function seed(): MockDb {
     role: "user",
     totalOrders: (i * 5) % 22,
     venueId: i % 3 === 0 ? "venue-2" : DEMO_VENUE_ID,
-    assignedOffers: buildAssignedOffers(i),
   }));
 
   const platformUsers: PlatformUser[] = [
@@ -435,7 +451,14 @@ function seed(): MockDb {
     },
   ];
 
-  return { orders, menu, events, games, users, bookings, notifications, scanLogs: [], platformUsers, venues, offers };
+  const assignedOffers: AssignedOffer[] = users.flatMap((u, i) =>
+    buildAssignedOffersForUser(u.id, i, offers),
+  );
+
+  return {
+    orders, menu, events, games, users, bookings, notifications,
+    scanLogs: [], platformUsers, venues, offers, assignedOffers,
+  };
 }
 
 // Mock Database
