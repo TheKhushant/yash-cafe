@@ -7,7 +7,7 @@ const orderRoutes = require('./order.routes');
 const bookingRoutes = require('./booking.routes');
 const gameRoutes = require('./game.routes');
 const notificationRoutes = require('./notification.routes');
-
+const platformUserRoutes = require('./platformUser.routes');
 const router = express.Router();
 
 router.use('/auth', authRoutes);
@@ -18,5 +18,6 @@ router.use('/orders', orderRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/games', gameRoutes);
 router.use('/notifications', notificationRoutes);
-
+router.use("/users", require("./user.routes"));
+router.use("/platform/users", require("./platformUser.routes"));
 module.exports = router;

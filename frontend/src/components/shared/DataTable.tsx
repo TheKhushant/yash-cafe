@@ -75,7 +75,8 @@ export function DataTable<T>({
   const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
   const safePage = Math.min(page, pageCount - 1);
   const rows = sorted.slice(safePage * pageSize, safePage * pageSize + pageSize);
-
+  console.log(sorted);
+  console.log(Array.isArray(sorted));
   function toggleSort(key: string) {
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));

@@ -17,9 +17,16 @@ function withAssignedOffers(users: PlatformUser[]): PlatformUser[] {
 
 export const usersService = {
   async list(venueId: string | null): Promise<PlatformUser[]> {
-    if (USE_MOCKS) return delay(withAssignedOffers(scoped(venueId)));
-    const { data } = await apiClient.get<PlatformUser[]>("/users", { params: { venueId } });
-    return data;
+  if (USE_MOCKS) return delay(withAssignedOffers(scoped(venueId)));
+
+  const { data } = await apiClient.get<{
+      success: boolean;
+      users: PlatformUser[];
+    }>("/users", {
+      params: { venueId },
+    });
+
+    return data.users;
   },
 
   async setStatus(id: string, status: PlatformUser["status"]): Promise<PlatformUser> {
@@ -65,8 +72,12 @@ export const usersService = {
         )
       );
     }
-    const { data } = await apiClient.get<PlatformUser[]>("/platform/users");
-    return data;
+    const { data } = await apiClient.get<{
+      success: boolean;
+      users: PlatformUser[];
+    }>("/platform/users");
+
+    return data.users;
   },
 
   async createPlatform(data: { name: string; email: string; role: string }) {

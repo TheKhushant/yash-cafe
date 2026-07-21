@@ -163,7 +163,9 @@ export default function UsersPage() {
     },
     onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Could not cancel offer"),
   });
-
+console.log("React Query =", users);
+console.log("Query Data =", users.data);
+console.log("Is users.data Array =", Array.isArray(users.data));
   const resendOffer = useMutation({
     mutationFn: (offer: AssignedOffer) => assignedOffersService.resendNotification(offer.id, scope),
     onSuccess: () => toast.success("Notification resent"),
