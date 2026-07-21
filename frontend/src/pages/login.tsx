@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { DEMO_LOGINS } from "@/lib/api/services/auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 export default function LoginPage() {
@@ -17,8 +16,8 @@ export default function LoginPage() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const [email, setEmail] = useState("admin@sportsbar.app");
-  const [password, setPassword] = useState("password");
+  const [email, setEmail] = useState("admin@sportsbar.com");
+  const [password, setPassword] = useState("admin@sportsbar.com");
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,25 +132,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 rounded-lg border bg-muted/40 p-3">
-            <p className="text-xs font-medium text-muted-foreground">Demo accounts</p>
-            <div className="mt-2 grid gap-2">
-              {DEMO_LOGINS.map((d) => (
-                <button
-                  key={d.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(d.email);
-                    setPassword(d.password);
-                  }}
-                  className="flex items-center justify-between rounded-md bg-card px-3 py-2 text-left text-xs ring-1 ring-border transition-colors hover:ring-primary/40"
-                >
-                  <span className="font-medium text-foreground">{d.label}</span>
-                  <span className="text-muted-foreground">{d.email}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>
